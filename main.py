@@ -6,11 +6,11 @@ import glob
 import os
 import sys
 import datetime
+from dateutil import parser
 1  # !/usr/bin/python
 """
 App for testing out trading ideas
 """
-
 
 DATA_DIR = 'data'
 SETTINGS_DIR = 'settings'
@@ -48,10 +48,12 @@ class Trading():
         self.doji_candle_colour = (125, 125, 125)
         self.order_colour = (20, 255, 20)
         self.stop_loss_colour = (255, 20, 20)
-        self.max_candles = 450
+        self.max_candles = 350
         self.last_candle = self.max_candles
+        self.temp_last_candle = 0
+        self.minutes = 1
         self.candle_width = 3
-        self.candle_spacing = 1
+        self.candle_spacing = 2
         self.chart_pip_height = 200
         self.min_height = 9999
         self.max_height = 0
@@ -91,16 +93,20 @@ class Trading():
         filenames = glob.glob(path)
         one_minute_index = first_substring(filenames, 'bid_1_m_2020-2022')
         five_minute_index = first_substring(filenames, 'bid_5_m_2020-2022')
+        fifteen_minute_index = first_substring(filenames, 'bid_15_m_2020-2022')
         one_hour_index = first_substring(filenames, 'bid_1_hour_2020-2022')
         four_hour_index = first_substring(filenames, 'bid_4_hour_2020-2022')
         daily_index = first_substring(filenames, 'bid_1_d_2020-2022')
 
         with open(filenames[one_minute_index]) as bid_file:
-            self.bid = bid_file.readlines()
+            self.one_minute_data = bid_file.readlines()
+        self.bid = self.one_minute_data
         self.ask = self.bid
 
         with open(filenames[five_minute_index]) as bid_file:
             self.five_minute_data = bid_file.readlines()
+        with open(filenames[fifteen_minute_index]) as bid_file:
+            self.fifteen_minute_data = bid_file.readlines()
         with open(filenames[one_hour_index]) as bid_file:
             self.one_hour_data = bid_file.readlines()
         with open(filenames[four_hour_index]) as bid_file:
@@ -337,18 +343,13 @@ class Trading():
                 if event.key == pygame.K_UP:
                     self.chart_pip_height -= 20
                 if event.key == pygame.K_LEFT:
+                    self.temp_last_candle -= self.minutes
                     self.last_candle -= 1
                     if self.last_candle < self.max_candles:
                         self.last_candle = self.max_candles
                 if event.key == pygame.K_RIGHT:
+                    self.temp_last_candle += self.minutes
                     self.last_candle += 1
-                if event.key == pygame.K_PAGEDOWN:
-                    self.last_candle -= 3
-                    if self.last_candle < self.max_candles:
-                        self.last_candle = self.max_candles
-                if event.key == pygame.K_PAGEUP:
-                    self.last_candle += 3
-                    pass
                 if event.key == pygame.K_h:
                     self.show_history = not self.show_history
                 if event.key == pygame.K_b:
@@ -360,21 +361,80 @@ class Trading():
                 if event.key == pygame.K_F1:
                     self.showing_help = not self.showing_help
                 if event.key == pygame.K_1:
-                    self.max_candles = 257
-                    self.candle_width = 4
-                    self.candle_spacing = 3
+                    self.last_candle = self.temp_last_candle
+                    self.minutes = 1
+                    self.last_candle = self.last_candle//self.minutes
+                    self.bid = self.one_minute_data
                 if event.key == pygame.K_2:
-                    self.max_candles = 600
-                    self.candle_width = 2
-                    self.candle_spacing = 1
+                    self.last_candle = self.temp_last_candle
+                    self.minutes = 5
+                    self.last_candle = self.last_candle//self.minutes
+                    current_datetime_string = self.one_minute_data[self.temp_last_candle].split(',')[0]
+                    current_datetime = parser.parse(current_datetime_string)
+                    higher_datetime_string = self.five_minute_data[self.last_candle].split(',')[0]
+                    higher_datetime = parser.parse(higher_datetime_string)
+                    while higher_datetime < current_datetime:
+                        self.last_candle+=1
+                        higher_datetime_string = self.five_minute_data[self.last_candle].split(',')[0]
+                        higher_datetime = parser.parse(higher_datetime_string)
+                    self.last_candle-=1
+                    self.bid = self.five_minute_data
                 if event.key == pygame.K_3:
-                    self.max_candles = 900
-                    self.candle_width = 1
-                    self.candle_spacing = 1
+                    self.last_candle = self.temp_last_candle
+                    self.minutes = 15
+                    self.last_candle = self.last_candle//self.minutes
+                    current_datetime_string = self.one_minute_data[self.temp_last_candle].split(',')[0]
+                    current_datetime = parser.parse(current_datetime_string)
+                    higher_datetime_string = self.fifteen_minute_data[self.last_candle].split(',')[0]
+                    higher_datetime = parser.parse(higher_datetime_string)
+                    while higher_datetime < current_datetime:
+                        self.last_candle+=1
+                        higher_datetime_string = self.fifteen_minute_data[self.last_candle].split(',')[0]
+                        higher_datetime = parser.parse(higher_datetime_string)
+                    self.last_candle-=1
+                    self.bid = self.fifteen_minute_data
                 if event.key == pygame.K_4:
-                    self.max_candles = 1800
-                    self.candle_width = 1
-                    self.candle_spacing = 0
+                    self.last_candle = self.temp_last_candle
+                    self.minutes = 60
+                    self.last_candle = self.last_candle//self.minutes
+                    current_datetime_string = self.one_minute_data[self.temp_last_candle].split(',')[0]
+                    current_datetime = parser.parse(current_datetime_string)
+                    higher_datetime_string = self.one_hour_data[self.last_candle].split(',')[0]
+                    higher_datetime = parser.parse(higher_datetime_string)
+                    while higher_datetime < current_datetime:
+                        self.last_candle+=1
+                        higher_datetime_string = self.one_hour_data[self.last_candle].split(',')[0]
+                        higher_datetime = parser.parse(higher_datetime_string)
+                    self.last_candle-=1
+                    self.bid = self.one_hour_data
+                if event.key == pygame.K_5:
+                    self.last_candle = self.temp_last_candle
+                    self.minutes = 240
+                    self.last_candle = self.last_candle//self.minutes
+                    current_datetime_string = self.one_minute_data[self.temp_last_candle].split(',')[0]
+                    current_datetime = parser.parse(current_datetime_string)
+                    higher_datetime_string = self.four_hour_data[self.last_candle].split(',')[0]
+                    higher_datetime = parser.parse(higher_datetime_string)
+                    while higher_datetime < current_datetime:
+                        self.last_candle+=1
+                        higher_datetime_string = self.four_hour_data[self.last_candle].split(',')[0]
+                        higher_datetime = parser.parse(higher_datetime_string)
+                    self.last_candle-=1
+                    self.bid = self.four_hour_data
+                if event.key == pygame.K_6:
+                    self.last_candle = self.temp_last_candle
+                    self.minutes = 1440
+                    self.last_candle = self.last_candle//self.minutes
+                    current_datetime_string = self.one_minute_data[self.temp_last_candle].split(',')[0]
+                    current_datetime = parser.parse(current_datetime_string)
+                    higher_datetime_string = self.daily_data[self.last_candle].split(',')[0]
+                    higher_datetime = parser.parse(higher_datetime_string)
+                    while higher_datetime < current_datetime:
+                        self.last_candle+=1
+                        higher_datetime_string = self.daily_data[self.last_candle].split(',')[0]
+                        higher_datetime = parser.parse(higher_datetime_string)
+                    self.last_candle-=1
+                    self.bid = self.daily_data
                 if event.key == pygame.K_p:
                     price = (self.screen_height - pygame.mouse.get_pos()
                              [1] - CHARTTOPYOFFSET)/self.factor + self.min_height
@@ -425,6 +485,7 @@ class Trading():
                 if len(data) == 2:
                     self.trade_state.equity = float(data[0].split('=')[1].rstrip())
                     self.last_candle = int(data[1].split('=')[1].rstrip())
+                    self.temp_last_candle = self.last_candle
             if os.path.exists(self.history_file):
                 with open(self.history_file) as config_file:
                     data = config_file.readlines()
@@ -432,9 +493,10 @@ class Trading():
                                         for x in data if x != "")
 
     def writeConfig(self):
+        self.last_candle = self.temp_last_candle
         with open(self.config_file, "w") as config_file:
-            config_file.write(str(self.trade_state.equity)+"\n")
-            config_file.write(str(self.last_candle)+"\n")
+            config_file.write('equity=' + str(self.trade_state.equity)+"\n")
+            config_file.write('last_candle=' + str(self.last_candle)+"\n")
         with open(self.history_file, "w") as history_file:
             for x in self.history:
                 history_file.write("{0} {1} {2} {3} {4}\n".format(
