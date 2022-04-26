@@ -1,2 +1,0 @@
-equity=10000.0
-last_candle=39933
