@@ -7,6 +7,8 @@ import os
 import sys
 import datetime
 from dateutil import parser
+import logging
+logging.basicConfig(level=logging.DEBUG)
 1  # !/usr/bin/python
 """
 App for testing out trading ideas
@@ -72,8 +74,9 @@ class Trading():
         self.showing_help = False
         self.trade_state = TradeState()
         self.history = list()
-        self.show_history = True
+        self.show_history = False
         self.support = list()
+        self.position_size = 0.5
         self.readConfig()
 
     def load_data(self):
@@ -243,23 +246,6 @@ class Trading():
         except:
             print("Unexpected error:", sys.exc_info())
 
-    def check_orders(self):
-        if (self.trade_state.trade_mode == TradeMode.BUY):
-            self.trade_state.pips = 1 + (float(self.bid[self.last_candle].split(
-                ',')[OHLC.CLOSEINDEX.value]) - self.trade_state.order_price) * 10000
-            self.trade_state.profit = self.trade_state.pips * \
-                self.trade_state.position_size * 100
-            if float(self.bid[self.last_candle].split(',')[OHLC.LOWINDEX.value]) <= self.trade_state.stop_loss_price:
-                self.close(self.trade_state.stop_loss_price)
-
-        if (self.trade_state.trade_mode == TradeMode.SELL):
-            self.trade_state.pips = 1 + (self.trade_state.order_price - float(
-                self.ask[self.last_candle].split(',')[OHLC.CLOSEINDEX.value])) * 10000
-            self.trade_state.profit = self.trade_state.pips * \
-                self.trade_state.position_size * 100
-            if float(self.ask[self.last_candle].split(',')[OHLC.HIGHINDEX.value]) >= self.trade_state.stop_loss_price:
-                self.close(self.trade_state.stop_loss_price)
-
     def draw_info_text(self):
         last_candle_data_text = self.font.render(
             self.bid[self.last_candle], 1, (self.bear_candle_colour))
@@ -280,31 +266,73 @@ class Trading():
             "Pips: " + str("%.1f" % self.trade_state.pips), 1, (self.bear_candle_colour))
         self.screen.blit(pips_text, (20, 145))
         position_size_text = self.font.render(
-            "Position Size: " + str("%.4f" % self.trade_state.position_size), 1, (self.bear_candle_colour))
+            "Position Size: " + str("%.2f" % self.trade_state.position_size), 1, (self.bear_candle_colour))
         self.screen.blit(position_size_text, (20, 170))
         help_text = self.font.render(
             "Press F1 to toggle help info ", 1, (self.bear_candle_colour))
         self.screen.blit(help_text, (20, 195))
 
+    def check_orders(self):
+        if (self.trade_state.trade_mode == TradeMode.BUY):
+            self.trade_state.pips = 1 + (float(self.bid[self.last_candle].split(
+                ',')[OHLC.CLOSEINDEX.value]) - self.trade_state.order_price) * 10000
+            self.trade_state.profit = self.trade_state.pips * \
+                abs(self.trade_state.position_size)
+            if float(self.bid[self.last_candle].split(',')[OHLC.LOWINDEX.value]) <= self.trade_state.stop_loss_price:
+                logging.debug('close buy check')
+                self.close(self.trade_state.stop_loss_price)
+
+        if (self.trade_state.trade_mode == TradeMode.SELL):
+            self.trade_state.pips = 1 + (self.trade_state.order_price - float(
+                self.bid[self.last_candle].split(',')[OHLC.CLOSEINDEX.value])) * 10000
+            self.trade_state.profit = self.trade_state.pips * \
+                abs(self.trade_state.position_size)
+            if float(self.bid[self.last_candle].split(',')[OHLC.HIGHINDEX.value]) >= self.trade_state.stop_loss_price:
+                logging.debug('close sell check')
+                self.close(self.trade_state.stop_loss_price)
+
     def buy(self):
-        if self.trade_state.trade_mode == TradeMode.CLOSED:
+        if self.trade_state.trade_mode == TradeMode.SELL:
+            return
+        current_close_price = float(self.bid[self.last_candle].split(',')[OHLC.CLOSEINDEX.value])
+        if self.trade_state.order_price:
+            self.trade_state.order_price = (self.trade_state.order_price*self.trade_state.position_size + current_close_price*self.position_size) \
+                                            / (self.trade_state.position_size+self.position_size)
+        else:
+            self.trade_state.order_price = current_close_price
+        self.trade_state.stop_loss_price = self.trade_state.order_price - TRADERISKPIPS * 0.0001
+        self.trade_state.position_size += self.position_size
+        self.trade_state.candle_number = self.last_candle
+        if self.trade_state.position_size > 0:
             self.trade_state.trade_mode = TradeMode.BUY
-            self.trade_state.order_price = float(
-                self.ask[self.last_candle].split(',')[OHLC.CLOSEINDEX.value])
-            self.trade_state.stop_loss_price = self.trade_state.order_price - TRADERISKPIPS * 0.0001
-            self.trade_state.position_size = self.trade_state.equity * \
-                TRADERISKPERCENT / TRADERISKPIPS * 0.01
-            self.trade_state.candle_number = self.last_candle
+        else:
+            self.trade_state.trade_mode = TradeMode.SELL
+        if self.trade_state.position_size == 0:
+            logging.debug('buy neutral close')
+            self.close(self.trade_state.order_price)
+
 
     def sell(self):
-        if self.trade_state.trade_mode == TradeMode.CLOSED:
+        if self.trade_state.trade_mode == TradeMode.BUY:
+            return
+        current_close_price = float(self.bid[self.last_candle].split(',')[OHLC.CLOSEINDEX.value])
+        if self.trade_state.order_price:
+            self.trade_state.order_price = (self.trade_state.order_price*self.trade_state.position_size + current_close_price*self.position_size*-1) \
+                                            / (self.trade_state.position_size+self.position_size*-1)
+        else:
+            self.trade_state.order_price = current_close_price
+        
+        self.trade_state.stop_loss_price = self.trade_state.order_price + TRADERISKPIPS * 0.0001
+        self.trade_state.position_size += self.position_size*-1
+        print(self.trade_state.order_price)
+        self.trade_state.candle_number = self.last_candle
+        if self.trade_state.position_size > 0:
+            self.trade_state.trade_mode = TradeMode.BUY
+        else:
             self.trade_state.trade_mode = TradeMode.SELL
-            self.trade_state.order_price = float(
-                self.bid[self.last_candle].split(',')[OHLC.CLOSEINDEX.value])
-            self.trade_state.stop_loss_price = self.trade_state.order_price + TRADERISKPIPS * 0.0001
-            self.trade_state.position_size = self.trade_state.equity * \
-                TRADERISKPERCENT / TRADERISKPIPS * 0.01
-            self.trade_state.candle_number = self.last_candle
+        if self.trade_state.position_size == 0:
+            logging.debug('sell neutral close')
+            self.close(self.trade_state.order_price)
 
     def close(self, close_price=None):
         if self.trade_state.trade_mode != TradeMode.CLOSED:
@@ -312,7 +340,7 @@ class Trading():
                 self.trade_state.candle_number,
                 self.trade_state.order_price,
                 self.last_candle,
-                close_price or self.ask[self.last_candle].split(
+                close_price or self.bid[self.last_candle].split(
                     ',')[OHLC.CLOSEINDEX.value],
                 self.trade_state.trade_mode.value
             ])
@@ -491,8 +519,8 @@ class Trading():
     def writeConfig(self):
         self.last_candle = self.temp_last_candle
         with open(self.config_file, "w") as config_file:
-            config_file.write('equity=' + str(self.trade_state.equity)+"\n")
-            config_file.write('last_candle=' + str(self.last_candle)+"\n")
+            config_file.write(f'equity={self.trade_state.equity:.2f}\n')
+            config_file.write(f'last_candle={self.last_candle}\n')
         with open(self.history_file, "w") as history_file:
             for x in self.history:
                 history_file.write("{0} {1} {2} {3} {4}\n".format(
