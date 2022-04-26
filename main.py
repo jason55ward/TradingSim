@@ -250,8 +250,7 @@ class Trading():
             self.trade_state.profit = self.trade_state.pips * \
                 self.trade_state.position_size * 100
             if float(self.bid[self.last_candle].split(',')[OHLC.LOWINDEX.value]) <= self.trade_state.stop_loss_price:
-                self.close(self.trade_state.trade_type,
-                           self.trade_state.stop_loss_price)
+                self.close(self.trade_state.stop_loss_price)
 
         if (self.trade_state.trade_mode == TradeMode.SELL):
             self.trade_state.pips = 1 + (self.trade_state.order_price - float(
@@ -259,8 +258,7 @@ class Trading():
             self.trade_state.profit = self.trade_state.pips * \
                 self.trade_state.position_size * 100
             if float(self.ask[self.last_candle].split(',')[OHLC.HIGHINDEX.value]) >= self.trade_state.stop_loss_price:
-                self.close(self.trade_state.trade_type,
-                           self.trade_state.stop_loss_price)
+                self.close(self.trade_state.stop_loss_price)
 
     def draw_info_text(self):
         last_candle_data_text = self.font.render(
@@ -288,7 +286,7 @@ class Trading():
             "Press F1 to toggle help info ", 1, (self.bear_candle_colour))
         self.screen.blit(help_text, (20, 195))
 
-    def buy(self, trade_type):
+    def buy(self):
         if self.trade_state.trade_mode == TradeMode.CLOSED:
             self.trade_state.trade_mode = TradeMode.BUY
             self.trade_state.order_price = float(
@@ -297,9 +295,8 @@ class Trading():
             self.trade_state.position_size = self.trade_state.equity * \
                 TRADERISKPERCENT / TRADERISKPIPS * 0.01
             self.trade_state.candle_number = self.last_candle
-            self.trade_state.trade_type = trade_type
 
-    def sell(self, trade_type):
+    def sell(self):
         if self.trade_state.trade_mode == TradeMode.CLOSED:
             self.trade_state.trade_mode = TradeMode.SELL
             self.trade_state.order_price = float(
@@ -308,9 +305,8 @@ class Trading():
             self.trade_state.position_size = self.trade_state.equity * \
                 TRADERISKPERCENT / TRADERISKPIPS * 0.01
             self.trade_state.candle_number = self.last_candle
-            self.trade_state.trade_type = trade_type
 
-    def close(self, trade_type, close_price=None):
+    def close(self, close_price=None):
         if self.trade_state.trade_mode != TradeMode.CLOSED:
             self.history.append([
                 self.trade_state.candle_number,
@@ -357,7 +353,7 @@ class Trading():
                 if event.key == pygame.K_s:
                     self.sell()
                 if event.key == pygame.K_c:
-                    self.close(self.trade_state.trade_type)
+                    self.close()
                 if event.key == pygame.K_F1:
                     self.showing_help = not self.showing_help
                 if event.key == pygame.K_1:
