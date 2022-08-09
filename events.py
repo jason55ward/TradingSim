@@ -24,12 +24,17 @@ class Events():
                     self.settings.chart_pip_height -= 20
                 if event.key == pygame.K_LEFT:
                     self.settings.last_candle -= self.settings.minutes
-                    self.settings.last_candle -= 1
                     if self.settings.last_candle < self.settings.max_candles:
                         self.settings.last_candle = self.settings.max_candles
                 if event.key == pygame.K_RIGHT:
                     self.settings.last_candle += self.settings.minutes
                     self.settings.last_candle += 1
+                if event.key == pygame.K_PAGEUP:
+                    self.settings.last_candle += self.settings.minutes
+                if event.key == pygame.K_PAGEDOWN:
+                    self.settings.last_candle -= self.settings.minutes
+                    if self.settings.last_candle < self.settings.max_candles:
+                        self.settings.last_candle = self.settings.max_candles
                 if event.key == pygame.K_h:
                     self.settings.show_history = not self.settings.show_history
                 if event.key == pygame.K_b:
@@ -41,12 +46,8 @@ class Events():
                 if event.key == pygame.K_F1:
                     self.settings.showing_help = not self.settings.showing_help
                 if event.key == pygame.K_1:
-                    self.settings.last_candle = self.settings.last_candle
                     self.settings.minutes = 1
-                    self.settings.last_candle = self.settings.last_candle//self.settings.minutes
-                    self.settings.bid = self.settings.one_minute_data
                 if event.key == pygame.K_2:
-                    self.settings.last_candle = self.settings.last_candle
                     self.settings.minutes = 5
                     self.settings.last_candle = self.settings.last_candle//self.settings.minutes
                     current_datetime_string = self.settings.one_minute_data[self.settings.last_candle].split(',')[0]

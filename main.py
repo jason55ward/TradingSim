@@ -33,7 +33,7 @@ class Trading():
         pygame.font.init()
         self.data = LoadData()
         data = self.data.load_data()
-        self.settings = Settings(data=data)   
+        self.settings = Settings(data=data)
         self.trade_state = TradeState()
         self.config = Config(self.settings.config_file, self.settings.history_file, self.trade_state)
         

@@ -12,14 +12,13 @@ class Orders():
 
 
     def buy(self):
-        if self.trade_state.trade_mode == TradeMode.SELL:
-            return
         current_close_price = float(self.settings.bid[self.settings.last_candle].split(',')[OHLC.CLOSEINDEX.value])
-        if self.trade_state.order_price:
-            self.trade_state.order_price = (self.trade_state.order_price*self.trade_state.position_size + current_close_price*self.settings.position_size) \
+        self.trade_state.order_prices.append(current_close_price)
+        if self.trade_state.average_price:
+            self.trade_state.average_price = (self.trade_state.order_price*self.trade_state.position_size + current_close_price*self.settings.position_size) \
                                             / (self.trade_state.position_size+self.settings.position_size)
         else:
-            self.trade_state.order_price = current_close_price
+            self.trade_state.average_price = current_close_price
         self.trade_state.stop_loss_price = self.trade_state.order_price - TRADE_RISK_PIPS * 0.0001
         self.trade_state.position_size += self.settings.position_size
         self.trade_state.candle_number = self.settings.last_candle
@@ -32,8 +31,6 @@ class Orders():
             self.close(self.trade_state.order_price)
 
     def sell(self):
-        if self.trade_state.trade_mode == TradeMode.BUY:
-            return
         current_close_price = float(self.settings.bid[self.settings.last_candle].split(',')[OHLC.CLOSEINDEX.value])
         if self.trade_state.order_price:
             self.trade_state.order_price = (self.trade_state.order_price*self.trade_state.position_size + current_close_price*self.settings.position_size*-1) \
@@ -65,10 +62,11 @@ class Orders():
             self.trade_state.trade_mode = TradeMode.CLOSED
             self.trade_state.equity += self.trade_state.profit
             self.trade_state.profit = 0
-            self.trade_state.order_price = 0
+            self.trade_state.order_prices = []
             self.trade_state.position_size = 0
             self.trade_state.stop_loss_price = 0
             self.trade_state.pips = 0
+            self.trade_state.average_price = 0
 
     def check_orders(self):
         if (self.trade_state.trade_mode == TradeMode.BUY):

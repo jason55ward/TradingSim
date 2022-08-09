@@ -6,7 +6,8 @@ class TradeState:
         self.equity = 100
         self.profit = 0
         self.trade_mode = TradeMode.CLOSED
-        self.order_prices = 0
+        self.order_prices = []
+        self.average_price = 0
         self.position_size = 0
         self.stop_loss_price = 0
         self.pips = 0

@@ -1,6 +1,7 @@
 from constants import *
 from enums import TradeMode, OHLC
 import pygame
+from helpers import draw_horizontal_dashed_line
 
 class Chart():
     def __init__(self, screen, trade_state, settings):
@@ -89,14 +90,20 @@ class Chart():
     
     def draw_orders(self):
         if (self.trade_state.trade_mode != TradeMode.CLOSED):
-            order_ypos = int(self.settings.screen_height - (self.trade_state.order_price -
+            average_price_ypos = int(self.settings.screen_height - (self.trade_state.average_price -
                              self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET
+            pygame.draw.line(self.screen, ORDER_COLOUR, (
+                0, order_ypos), (self.settings.screen_width - CHART_RIGHT_SPACING, average_price_ypos))
             stop_ypos = int(self.settings.screen_height - (self.trade_state.stop_loss_price -
                             self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET
-            draw_horizontal_dashed_line(self.screen, ORDER_COLOUR, (
-                0, order_ypos), (self.settings.screen_width - CHART_RIGHT_SPACING, order_ypos))
             draw_horizontal_dashed_line(self.screen, STOP_LOSS_COLOUR, (
                 0, stop_ypos), (self.settings.screen_width - CHART_RIGHT_SPACING, stop_ypos))
+            for order_price in self.trade_state.order_prices:
+                order_price_ypos = int(self.settings.screen_height - (order_price -
+                             self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET
+                draw_horizontal_dashed_line(self.screen, ORDER_COLOUR, (
+                0, order_ypos), (self.settings.screen_width - CHART_RIGHT_SPACING, order_price_ypos))
+
         
     def draw_history(self):
         history_offset = self.settings.last_candle - self.settings.max_candles
