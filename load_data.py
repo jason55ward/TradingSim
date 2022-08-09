@@ -49,4 +49,4 @@ class LoadData():
         with open(filenames[daily_index]) as bid_file:
             self.daily_data = tuple(bid_file.readlines())
 
-        return self.one_minute_data, self.five_minute_data
+        return [self.one_minute_data, self.five_minute_data, self.fifteen_minute_data, self.one_hour_data, self.four_hour_data, self.daily_data]

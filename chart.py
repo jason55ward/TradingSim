@@ -13,11 +13,11 @@ class Chart():
         self.settings.max_height = 0
         self.settings.min_height = 9999
         for x in range(0, self.settings.max_candles):
-            offset = self.settings.last_candle-x
-            high = float(self.settings.bid[offset].split(',')[OHLC.HIGHINDEX.value])
+            offset = self.settings.last_candle//self.settings.minutes-x
+            high = float(self.settings.data[offset].split(',')[OHLC.HIGHINDEX.value])
             if high > self.settings.max_height:
                 self.settings.max_height = high
-            low = float(self.settings.bid[offset].split(',')[OHLC.LOWINDEX.value])
+            low = float(self.settings.data[offset].split(',')[OHLC.LOWINDEX.value])
             if low < self.settings.min_height:
                 self.settings.min_height = low
         self.settings.factor = (self.settings.screen_height - CHART_TOP_Y_OFFSET) / \
@@ -42,15 +42,15 @@ class Chart():
         
     def draw_chart_data(self):
         for x in range(0, self.settings.max_candles):
-            offset = self.settings.last_candle-x
+            offset = self.settings.last_candle//self.settings.minutes-x
             xpos = self.settings.candle_spacing + \
                 (self.settings.candle_spacing + self.settings.candle_width) * (self.settings.max_candles-x)
-            open_price = float(self.settings.bid[offset].split(',')[
+            open_price = float(self.settings.data[offset].split(',')[
                                OHLC.OPENINDEX.value])
-            high_price = float(self.settings.bid[offset].split(',')[
+            high_price = float(self.settings.data[offset].split(',')[
                                OHLC.HIGHINDEX.value])
-            low_price = float(self.settings.bid[offset].split(',')[OHLC.LOWINDEX.value])
-            close_price = float(self.settings.bid[offset].split(',')[
+            low_price = float(self.settings.data[offset].split(',')[OHLC.LOWINDEX.value])
+            close_price = float(self.settings.data[offset].split(',')[
                                 OHLC.CLOSEINDEX.value])
             candle_open_ypos = int(
                 self.settings.screen_height - (open_price-self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET
@@ -62,22 +62,20 @@ class Chart():
                 self.settings.screen_height - (close_price-self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET
             candle_close_distance = int(
                 abs(open_price-close_price) * self.settings.factor)
+            # Draw Candle Wick
+            colour = BULL_CANDLE_COLOUR
+            top_y_pos = candle_close_ypos
+            bottom_y_pos = candle_open_ypos
             if candle_open_ypos < candle_close_ypos:
-                pygame.draw.rect(self.screen, BEAR_CANDLE_COLOUR, (xpos,
-                                 candle_open_ypos, self.settings.candle_width, candle_close_distance))
-                # Draw Candle Wick
-                pygame.draw.line(self.screen, DOJI_CANDLE_COLOUR, (xpos+int(self.settings.candle_width/2),
-                                 candle_high_ypos), (xpos+int(self.settings.candle_width/2), candle_open_ypos), 1)
-                pygame.draw.line(self.screen, DOJI_CANDLE_COLOUR, (xpos+int(self.settings.candle_width/2),
-                                 candle_low_ypos), (xpos+int(self.settings.candle_width/2), candle_close_ypos), 1)
-            elif candle_open_ypos > candle_close_ypos:
-                pygame.draw.rect(self.screen, BULL_CANDLE_COLOUR, (xpos,
-                                 candle_close_ypos, self.settings.candle_width, candle_close_distance))
-                # Draw Candle Wick
-                pygame.draw.line(self.screen, DOJI_CANDLE_COLOUR, (xpos+int(self.settings.candle_width/2),
-                                 candle_high_ypos), (xpos+int(self.settings.candle_width/2), candle_close_ypos), 1)
-                pygame.draw.line(self.screen, DOJI_CANDLE_COLOUR, (xpos+int(self.settings.candle_width/2),
-                                 candle_low_ypos), (xpos+int(self.settings.candle_width/2), candle_open_ypos), 1)
+                colour = BEAR_CANDLE_COLOUR
+                top_y_pos = candle_open_ypos
+                bottom_y_pos = candle_close_ypos
+                
+            start_x_pos = xpos+int(self.settings.candle_width/2)
+            end_x_pos = xpos+int(self.settings.candle_width/2)
+            pygame.draw.rect(self.screen, colour, (xpos, top_y_pos, self.settings.candle_width, candle_close_distance))
+            pygame.draw.line(self.screen, DOJI_CANDLE_COLOUR, (start_x_pos, candle_high_ypos), (end_x_pos, top_y_pos), 1)
+            pygame.draw.line(self.screen, DOJI_CANDLE_COLOUR, (start_x_pos, candle_low_ypos), (end_x_pos, bottom_y_pos), 1)
             # Draw Candle Body
             pygame.draw.line(self.screen, DOJI_CANDLE_COLOUR, (xpos,
                              candle_open_ypos), (xpos+self.settings.candle_width, candle_open_ypos), 1)
@@ -93,7 +91,7 @@ class Chart():
             average_price_ypos = int(self.settings.screen_height - (self.trade_state.average_price -
                              self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET
             pygame.draw.line(self.screen, ORDER_COLOUR, (
-                0, order_ypos), (self.settings.screen_width - CHART_RIGHT_SPACING, average_price_ypos))
+                0, average_price_ypos), (self.settings.screen_width - CHART_RIGHT_SPACING, average_price_ypos))
             stop_ypos = int(self.settings.screen_height - (self.trade_state.stop_loss_price -
                             self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET
             draw_horizontal_dashed_line(self.screen, STOP_LOSS_COLOUR, (
@@ -102,7 +100,7 @@ class Chart():
                 order_price_ypos = int(self.settings.screen_height - (order_price -
                              self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET
                 draw_horizontal_dashed_line(self.screen, ORDER_COLOUR, (
-                0, order_ypos), (self.settings.screen_width - CHART_RIGHT_SPACING, order_price_ypos))
+                0, order_price_ypos), (self.settings.screen_width - CHART_RIGHT_SPACING, order_price_ypos))
 
         
     def draw_history(self):
