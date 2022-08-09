@@ -4,7 +4,12 @@ from constants import *
 
 class LoadData():
     def __init__(self):
-        pass
+        self.one_minute_data = ()
+        self.five_minute_data = ()
+        self.fifteen_minute_data = ()
+        self.one_hour_data = ()
+        self.four_hour_data = ()
+        self.daily_data = ()
 
     def load_data(self):
         """
@@ -29,19 +34,19 @@ class LoadData():
         daily_index = first_substring(filenames, 'bid_1_d_2020-2022')
 
         with open(filenames[one_minute_index]) as bid_file:
-            self.one_minute_data = bid_file.readlines()
+            self.one_minute_data = tuple(bid_file.readlines())
         self.bid = self.one_minute_data
         self.ask = self.bid
 
         with open(filenames[five_minute_index]) as bid_file:
-            self.five_minute_data = bid_file.readlines()
+            self.five_minute_data = tuple(bid_file.readlines())
         with open(filenames[fifteen_minute_index]) as bid_file:
-            self.fifteen_minute_data = bid_file.readlines()
+            self.fifteen_minute_data = tuple(bid_file.readlines())
         with open(filenames[one_hour_index]) as bid_file:
-            self.one_hour_data = bid_file.readlines()
+            self.one_hour_data = tuple(bid_file.readlines())
         with open(filenames[four_hour_index]) as bid_file:
-            self.four_hour_data = bid_file.readlines()
+            self.four_hour_data = tuple(bid_file.readlines())
         with open(filenames[daily_index]) as bid_file:
-            self.daily_data = bid_file.readlines()
+            self.daily_data = tuple(bid_file.readlines())
 
-        return self.one_minute_data
+        return self.one_minute_data, self.five_minute_data
