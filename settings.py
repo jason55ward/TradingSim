@@ -24,10 +24,9 @@ class Settings():
         self.history = list()
         self.show_history = False
         self.support = list()
-        self.position_size = 0.5
+        self.position_size = 1
         self.max_height = 0
         self.min_height = 9999
-        self.temp_last_candle = 0
         self.minutes = 1
         self.last_candle = self.max_candles
         self.start_time = datetime.now()

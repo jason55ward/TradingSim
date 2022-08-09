@@ -8,14 +8,15 @@ class Events():
     def __init__(self, trade_state, settings, config):
         self.settings = settings
         self.config = config
+        self.trade_state = trade_state
         self.orders = Orders(trade_state=trade_state, settings=settings,)
+
 
     def process_events(self):
         events = pygame.event.get(pump=True)
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.settings.last_candle = self.settings.temp_last_candle
                     self.config.write_config(self.settings.last_candle, self.settings.history)
                     self.settings.done = True
                 if event.key == pygame.K_DOWN:
@@ -41,7 +42,7 @@ class Events():
                 if event.key == pygame.K_s:
                     self.orders.trade(order_type=TradeMode.SELL)
                 if event.key == pygame.K_c:
-                    self.place_orders.close()
+                    self.orders.close()
                 if event.key == pygame.K_F1:
                     self.settings.showing_help = not self.settings.showing_help
                 if event.key == pygame.K_1:
@@ -81,6 +82,5 @@ class Events():
                     move = +15
                 self.settings.last_candle += move
             if event.type is QUIT:
-                self.settings.last_candle = self.settings.temp_last_candle
                 self.config.write_config(self.settings.last_candle, self.settings.history)
                 self.settings.done = True
