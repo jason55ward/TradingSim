@@ -32,8 +32,11 @@ class TextDisplay():
             "Press F1 to toggle help info ", 1, (FONT_COLOUR))
         self.screen.blit(help_text, (20, 195))
         average_price_text = self.settings.font.render(
-            "Average Price: " + str("%.2f" % self.trade_state.average_price), 1, (FONT_COLOUR))
+            f"Average Price: {self.trade_state.average_price}", 1, (FONT_COLOUR))
         self.screen.blit(average_price_text, (20, 220))
+        timeframe_text = self.settings.font.render(
+            "Timeframe: " + str("%.2f" % self.settings.minutes), 1, (FONT_COLOUR))
+        self.screen.blit(timeframe_text, (20, 245))
 
     def displayHelp(self):
         text1 = "Move 1 candle: use left and right arrow."

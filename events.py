@@ -24,11 +24,11 @@ class Events():
                 if event.key == pygame.K_UP:
                     self.settings.chart_pip_height -= 20
                 if event.key == pygame.K_LEFT:
-                    self.settings.last_candle -= 1
+                    self.settings.last_candle -= self.settings.minutes
                     if self.settings.last_candle < self.settings.max_candles:
                         self.settings.last_candle = self.settings.max_candles
                 if event.key == pygame.K_RIGHT:
-                    self.settings.last_candle += 1
+                    self.settings.last_candle += self.settings.minutes
                 if event.key == pygame.K_PAGEUP:
                     self.settings.last_candle += self.settings.minutes
                 if event.key == pygame.K_PAGEDOWN:

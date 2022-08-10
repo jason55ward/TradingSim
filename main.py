@@ -44,7 +44,7 @@ class Trading():
         
         self.text_display = TextDisplay(screen=self.screen, trade_state=self.trade_state, 
                                         settings=self.settings)
-        self.config.read_config()
+        self.trade_state.equity, self.settings.last_candle = self.config.read_config()
         self.chart = Chart(screen=self.screen, trade_state=self.trade_state, settings=self.settings)
         self.events = Events(trade_state=self.trade_state, settings=self.settings, config=self.config)
         self.orders = Orders(trade_state=self.trade_state, settings=self.settings)
@@ -74,14 +74,20 @@ class Trading():
         """
         Draws the chart
         """
-        if self.settings.last_candle < self.settings.max_candles:
-            self.settings.last_candle = self.settings.max_candles
-        self.chart.calc_high_low_price()
-        self.chart.draw_price_lines()
-        self.chart.draw_chart_data()
-        self.chart.draw_orders()
-        if self.settings.show_history:
-            self.chart.draw_history()
+        try:
+            if self.settings.last_candle < self.settings.max_candles:
+                self.settings.last_candle = self.settings.max_candles
+            self.chart.calc_high_low_price()
+            self.chart.draw_price_lines()
+            self.chart.draw_chart_data()
+            self.chart.draw_orders()
+            if self.settings.show_history:
+                self.chart.draw_history()
+        except:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+            print(sys.exc_info())
 
 
 if __name__ == "__main__":

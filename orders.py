@@ -2,7 +2,6 @@ import logging
 from dateutil import parser
 from constants import *
 from enums import TradeMode, OHLC
-import sys, os
 
 class Orders():
     def __init__(self, trade_state, settings):
