@@ -14,7 +14,10 @@ class Orders():
         self.trade_state.order_prices.append(current_close_price)
         buy_or_sell = 1 if order_type==TradeMode.BUY else -1
         if self.trade_state.average_price:
-            self.trade_state.average_price = (self.trade_state.average_price*self.trade_state.position_size + current_close_price*self.settings.position_size*buy_or_sell) \
+            if (self.trade_state.position_size+self.settings.position_size*buy_or_sell) == 0:
+                self.trade_state.average_price = 0
+            else:
+                self.trade_state.average_price = (self.trade_state.average_price*self.trade_state.position_size + current_close_price*self.settings.position_size*buy_or_sell) \
                                             / (self.trade_state.position_size+self.settings.position_size*buy_or_sell)
         else:
             self.trade_state.average_price = current_close_price
