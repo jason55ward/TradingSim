@@ -15,7 +15,7 @@ class Chart():
             self.settings.max_height = 0
             self.settings.min_height = 9999
             for x in range(0, self.settings.max_candles):
-                offset = self.settings.last_candle//self.settings.minutes-x
+                offset = self.settings.last_candle-x
                 high = float(self.settings.data[offset].split(',')[OHLC.HIGHINDEX.value])
                 if high > self.settings.max_height:
                     self.settings.max_height = high
@@ -57,7 +57,7 @@ class Chart():
     def draw_chart_data(self):
         try:
             for x in range(-1, self.settings.max_candles):
-                offset = self.settings.last_candle//self.settings.minutes-x
+                offset = self.settings.last_candle-x
                 if x == -1:
                     #currently not working because data is dirty and switching between timeframes doesn't correlate mathematically for line numbers
                     continue

@@ -8,7 +8,7 @@ class TextDisplay():
 
     def draw_info_text(self):
         last_candle_data_text = self.settings.font.render(
-            self.settings.bid[self.settings.last_candle].replace('\n',''), 1, (FONT_COLOUR))
+            self.settings.data[self.settings.last_candle].replace('\n',''), 1, (FONT_COLOUR))
         self.screen.blit(last_candle_data_text, (20, 20))
         equity_text = self.settings.font.render(f"Pre-Trade Balance: {'%.2f' % self.trade_state.equity}", 1, (FONT_COLOUR))
         self.screen.blit(equity_text, (20, 45))

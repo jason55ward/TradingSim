@@ -10,7 +10,7 @@ class Orders():
         logging.basicConfig(level=logging.DEBUG)
 
     def trade(self, order_type=TradeMode.BUY):
-        current_close_price = float(self.settings.bid[self.settings.last_candle].split(',')[OHLC.CLOSEINDEX.value])
+        current_close_price = float(self.settings.data[self.settings.last_candle].split(',')[OHLC.CLOSEINDEX.value])
         self.trade_state.order_prices.append(current_close_price)
         buy_or_sell = 1 if order_type==TradeMode.BUY else -1
         if self.trade_state.average_price:
@@ -38,7 +38,7 @@ class Orders():
                 self.trade_state.candle_number,
                 self.trade_state.average_price,
                 self.settings.last_candle,
-                close_price or self.settings.bid[self.settings.last_candle].split(
+                close_price or self.settings.data[self.settings.last_candle].split(
                     ',')[OHLC.CLOSEINDEX.value],
                 self.trade_state.trade_mode.value
             ])
@@ -52,9 +52,9 @@ class Orders():
             self.trade_state.average_price = 0
 
     def check_orders(self):
-        current_close_price = float(self.settings.bid[self.settings.last_candle].split(',')[OHLC.CLOSEINDEX.value])
-        current_high_price = float(self.settings.bid[self.settings.last_candle].split(',')[OHLC.HIGHINDEX.value])
-        current_low_price = float(self.settings.bid[self.settings.last_candle].split(',')[OHLC.LOWINDEX.value])
+        current_close_price = float(self.settings.data[self.settings.last_candle].split(',')[OHLC.CLOSEINDEX.value])
+        current_high_price = float(self.settings.data[self.settings.last_candle].split(',')[OHLC.HIGHINDEX.value])
+        current_low_price = float(self.settings.data[self.settings.last_candle].split(',')[OHLC.LOWINDEX.value])
         if (self.trade_state.trade_mode == TradeMode.BUY):
             self.trade_state.pips = (current_close_price - self.trade_state.average_price) * 10000-1
             self.trade_state.profit = self.trade_state.pips * abs(self.trade_state.position_size)
