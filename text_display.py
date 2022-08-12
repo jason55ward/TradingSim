@@ -31,17 +31,15 @@ class TextDisplay():
         text1 = "Move 1 candle: use left and right arrow."
         text2 = "Move multiple candles: use PageUp and PageDown."
         text3 = "Buy/Sell: b/s."
-        text5 = "Change Zoom: 1-4."
-        text6 = "Exit: Escape."
+        text4 = "Change Zoom: 1-4."
+        text5 = "Exit: Escape."
         text1_text = self.settings.font.render(text1, 1, (FONT_COLOUR))
         text2_text = self.settings.font.render(text2, 1, (FONT_COLOUR))
         text3_text = self.settings.font.render(text3, 1, (FONT_COLOUR))
         text4_text = self.settings.font.render(text4, 1, (FONT_COLOUR))
         text5_text = self.settings.font.render(text5, 1, (FONT_COLOUR))
-        text6_text = self.settings.font.render(text6, 1, (FONT_COLOUR))
         self.screen.blit(text1_text, (700, 60))
         self.screen.blit(text2_text, (700, 85))
         self.screen.blit(text3_text, (700, 110))
         self.screen.blit(text4_text, (700, 135))
         self.screen.blit(text5_text, (700, 160))
-        self.screen.blit(text6_text, (700, 185))

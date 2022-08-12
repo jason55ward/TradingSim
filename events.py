@@ -30,9 +30,9 @@ class Events():
                 if event.key == pygame.K_RIGHT:
                     self.settings.last_candle += 1
                 if event.key == pygame.K_PAGEUP:
-                    self.settings.last_candle += self.settings.minutes
+                    self.settings.last_candle += 3
                 if event.key == pygame.K_PAGEDOWN:
-                    self.settings.last_candle -= self.settings.minutes
+                    self.settings.last_candle -= 3
                     if self.settings.last_candle < self.settings.max_candles:
                         self.settings.last_candle = self.settings.max_candles
                 if event.key == pygame.K_h:
