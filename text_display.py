@@ -29,9 +29,9 @@ class TextDisplay():
 
     def displayHelp(self):
         text1 = "Move 1 candle: use left and right arrow."
-        text2 = "Move multiple candles: use PageUp and PageDown."
+        text2 = "Move 3 candles: use PageUp and PageDown."
         text3 = "Buy/Sell: b/s."
-        text4 = "Change Zoom: 1-4."
+        text4 = "Change Timeframe: 1-6."
         text5 = "Exit: Escape."
         text1_text = self.settings.font.render(text1, 1, (FONT_COLOUR))
         text2_text = self.settings.font.render(text2, 1, (FONT_COLOUR))
