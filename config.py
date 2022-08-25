@@ -25,7 +25,7 @@ class Config():
             #         self.history = list(hist.rstrip().split() for hist in data if hist != "")
         return date_time, equity
 
-    def write_config(self, equity, date_time, history=[]):
+    def write_config(self, date_time, equity, history=[]):
         with open(self.config_file, "w") as config_file:
             config_file.write(f'date_time={date_time}\n')
             config_file.write(f'equity={equity:.2f}\n')

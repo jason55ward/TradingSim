@@ -32,8 +32,10 @@ class Trading():
         pygame.init()
         pygame.font.init()
         self.settings = Settings()
-        self.state = TradeState()
+        
         self.config = Config(self.settings.config_file, self.state.history_file)
+        self.state = TradeState()
+        self.state.date_time, self.state.equity = self.config.read_config()
         self.cache = CacheManagement(self.state)
         
         self.screen = pygame.display.set_mode(size=(
@@ -43,7 +45,7 @@ class Trading():
         
         self.text_display = TextDisplay(screen=self.screen, state=self.state, 
                                         settings=self.settings)
-        self.settings.data_dir, self.state.equity, self.settings.last_candle = self.config.read_config()
+        
         self.chart = Chart(screen=self.screen, state=self.state, settings=self.settings)
         self.events = Events(state=self.state, settings=self.settings, config=self.config)
         self.orders = Orders(state=self.state, settings=self.settings)

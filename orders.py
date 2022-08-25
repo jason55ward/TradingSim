@@ -24,7 +24,6 @@ class Orders():
             self.state.stop_loss_price = self.state.average_price - (TRADE_RISK_PIPS * 0.0001)*buy_or_sell
 
         self.state.position_size += self.settings.default_position_size*buy_or_sell
-        self.state.candle_number = self.settings.last_candle
         if self.state.position_size > 0:
             self.state.trade_mode = TradeMode.BUY
         else:
@@ -34,14 +33,14 @@ class Orders():
 
     def close(self, close_price=None):
         if self.state.trade_mode != TradeMode.CLOSED:
-            self.state.history.append([
-                self.state.candle_number,
-                self.state.average_price,
-                self.settings.last_candle,
-                close_price or self.settings.data[self.settings.last_candle].split(
-                    ',')[OHLC.CLOSEINDEX.value],
-                self.state.trade_mode.value
-            ])
+            # self.state.history.append([
+            #     self.state.candle_number,
+            #     self.state.average_price,
+            #     self.settings.last_candle,
+            #     close_price or self.settings.data[self.settings.last_candle].split(
+            #         ',')[OHLC.CLOSEINDEX.value],
+            #     self.state.trade_mode.value
+            # ])
             self.state.trade_mode = TradeMode.CLOSED
             self.state.equity += self.state.profit
             self.state.profit = 0

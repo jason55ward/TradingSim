@@ -17,7 +17,7 @@ class Events():
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.config.write_config(self.settings.last_candle, self.state.history)
+                    self.config.write_config(self.state.date_time, self.state.equity)
                     self.settings.done = True
                 if event.key == pygame.K_DOWN:
                     self.settings.chart_pip_height += 20

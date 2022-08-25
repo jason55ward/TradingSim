@@ -1,6 +1,6 @@
-DATA_DIR = 'data'
+DATA_DIR = '/ssd/Code/Trading Data/'
 SETTINGS_DIR = 'settings'
-CURRENCY_PAIR = 'GBPUSD'
+CURRENCY_PAIR = 'SPXUSD'
 DEFAULT_FONT = 'dejavuserif'
 DEFAULT_FONT_SIZE = 20
 DEFAULT_EQUITY = 100

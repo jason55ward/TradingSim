@@ -12,7 +12,6 @@ class TradeState:
         self.position_size = 0
         self.stop_loss_price = 0
         self.pips = 0
-        self.candle_number = 0
         self.date_time = date_time
         self.time_frame = 1
         self.date_time = None
