@@ -5,11 +5,11 @@ from constants import *
 from enums import TradeMode, OHLC
 
 class Events():
-    def __init__(self, trade_state, settings, config):
+    def __init__(self, state, settings, config):
         self.settings = settings
         self.config = config
-        self.trade_state = trade_state
-        self.orders = Orders(trade_state=trade_state, settings=settings,)
+        self.state = state
+        self.orders = Orders(state=state, settings=settings,)
 
 
     def process_events(self):
@@ -17,7 +17,7 @@ class Events():
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.config.write_config(self.settings.last_candle, self.settings.history)
+                    self.config.write_config(self.settings.last_candle, self.state.history)
                     self.settings.done = True
                 if event.key == pygame.K_DOWN:
                     self.settings.chart_pip_height += 20
@@ -25,16 +25,16 @@ class Events():
                     self.settings.chart_pip_height -= 20
                 if event.key == pygame.K_LEFT:
                     self.settings.last_candle -= 1
-                    if self.settings.last_candle < self.settings.max_candles:
-                        self.settings.last_candle = self.settings.max_candles
+                    if self.settings.last_candle < MAX_CANDLES:
+                        self.settings.last_candle = MAX_CANDLES
                 if event.key == pygame.K_RIGHT:
                     self.settings.last_candle += 1
                 if event.key == pygame.K_PAGEUP:
                     self.settings.last_candle += 3
                 if event.key == pygame.K_PAGEDOWN:
                     self.settings.last_candle -= 3
-                    if self.settings.last_candle < self.settings.max_candles:
-                        self.settings.last_candle = self.settings.max_candles
+                    if self.settings.last_candle < MAX_CANDLES:
+                        self.settings.last_candle = MAX_CANDLES
                 if event.key == pygame.K_h:
                     self.settings.show_history = not self.settings.show_history
                 if event.key == pygame.K_b:
@@ -46,33 +46,33 @@ class Events():
                 if event.key == pygame.K_F1:
                     self.settings.showing_help = not self.settings.showing_help
                 if event.key == pygame.K_1:
-                    self.settings.minutes = ONE_MINUTE
+                    self.state.time_frame = ONE_MINUTE
                     self.settings.data = self.settings.one_minute_data
                 if event.key == pygame.K_2:
-                    self.settings.minutes = FIVE_MINUTES
+                    self.state.time_frame = FIVE_MINUTES
                     self.settings.data = self.settings.five_minute_data
                 if event.key == pygame.K_3:
-                    self.settings.minutes = FIFTEEN_MINUTES
+                    self.state.time_frame = FIFTEEN_MINUTES
                     self.settings.data = self.settings.fifteen_minute_data
                 if event.key == pygame.K_4:
-                    self.settings.minutes = ONE_HOUR
+                    self.state.time_frame = ONE_HOUR
                     self.settings.data = self.settings.one_hour_data
                 if event.key == pygame.K_5:
-                    self.settings.minutes = FOUR_HOUR
+                    self.state.time_frame = FOUR_HOUR
                     self.settings.data = self.settings.four_hour_data
                 if event.key == pygame.K_6:
-                    self.settings.minutes = ONE_DAY
-                    self.settings.data = self.settings.daily_data
+                    self.state.time_frame = ONE_DAY
+                    self.settings.data = self.state.daily_data
                 if event.key == pygame.K_p:
                     price = (self.settings.screen_height - pygame.mouse.get_pos()[1] - CHART_TOP_Y_OFFSET)/self.settings.factor + self.settings.min_height
-                    self.settings.support.append(price)
+                    self.state.support.append(price)
                 if event.key == pygame.K_i:
-                    self.settings.support.clear()
+                    self.state.support.clear()
                 if event.key == pygame.K_o:
-                    self.settings.support.pop()
+                    self.state.support.pop()
                 if event.key == pygame.K_k:
                     price = (self.settings.screen_height - pygame.mouse.get_pos()[1] - CHART_TOP_Y_OFFSET)/self.settings.factor + self.settings.min_height
-                    self.trade_state.stop_loss_price = price
+                    self.state.stop_loss_price = price
             if event.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[0]:
                 rel = pygame.mouse.get_rel()[0]
                 move = 0
@@ -82,5 +82,5 @@ class Events():
                     move = +15
                 self.settings.last_candle += move
             if event.type is QUIT:
-                self.config.write_config(self.settings.last_candle, self.settings.history)
+                self.config.write_config(self.settings.last_candle, self.state.history)
                 self.settings.done = True

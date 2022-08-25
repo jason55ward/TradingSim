@@ -5,16 +5,16 @@ from helpers import draw_horizontal_dashed_line
 import sys, os
 
 class Chart():
-    def __init__(self, screen, trade_state, settings):
+    def __init__(self, screen, state, settings):
         self.screen = screen
-        self.trade_state = trade_state
+        self.state = state
         self.settings = settings
 
     def calc_high_low_price(self):
         try:
             self.settings.max_height = 0
             self.settings.min_height = 9999
-            for x in range(0, self.settings.max_candles):
+            for x in range(0, MAX_CANDLES):
                 offset = self.settings.last_candle-x
                 high = float(self.settings.data[offset].split(',')[OHLC.HIGHINDEX.value])
                 if high > self.settings.max_height:
@@ -43,7 +43,7 @@ class Chart():
                     str(val).ljust(7, '0'), 1, (BEAR_CANDLE_COLOUR))
                 self.screen.blit(text, (self.settings.screen_width -
                                 CHART_RIGHT_SPACING, line_ypos - 13))
-            for val in self.settings.support:
+            for val in self.state.support:
                 line_ypos = int(self.settings.screen_height - (float(val) -
                                 self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET
                 pygame.draw.line(self.screen, BULL_CANDLE_COLOUR, (0, line_ypos),
@@ -56,18 +56,18 @@ class Chart():
         
     def draw_chart_data(self):
         try:
-            for x in range(0, self.settings.max_candles):
+            for x in range(0, MAX_CANDLES):
                 offset = self.settings.last_candle-x
                 if x == -1:
                     #currently not working because data is dirty and switching between timeframes doesn't correlate mathematically for line numbers
                     continue
-                    minutes_outstanding = self.settings.last_candle % self.settings.minutes
+                    minutes_outstanding = self.settings.last_candle % self.state.time_frame
                     print(minutes_outstanding)
                     if minutes_outstanding == 0: 
                         continue
                     offset+=2
                     xpos = self.settings.candle_spacing + \
-                        (self.settings.candle_spacing + self.settings.candle_width) * (self.settings.max_candles+1)
+                        (self.settings.candle_spacing + self.settings.candle_width) * (MAX_CANDLES+1)
                     open_price = float(self.settings.bid[offset].split(',')[
                                     OHLC.OPENINDEX.value])
                     close_price = float(self.settings.bid[offset+minutes_outstanding].split(',')[
@@ -86,7 +86,7 @@ class Chart():
                     
                 else:
                     xpos = self.settings.candle_spacing + \
-                        (self.settings.candle_spacing + self.settings.candle_width) * (self.settings.max_candles-x)
+                        (self.settings.candle_spacing + self.settings.candle_width) * (MAX_CANDLES-x)
                     open_price = float(self.settings.data[offset].split(',')[
                                     OHLC.OPENINDEX.value])
                     high_price = float(self.settings.data[offset].split(',')[
@@ -137,16 +137,16 @@ class Chart():
             print(offset)
     
     def draw_orders(self):
-        if (self.trade_state.trade_mode != TradeMode.CLOSED):
-            average_price_ypos = int(self.settings.screen_height - (self.trade_state.average_price -
+        if (self.state.trade_mode != TradeMode.CLOSED):
+            average_price_ypos = int(self.settings.screen_height - (self.state.average_price -
                              self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET
             pygame.draw.line(self.screen, ORDER_COLOUR, (
                 0, average_price_ypos), (self.settings.screen_width - CHART_RIGHT_SPACING, average_price_ypos))
-            stop_ypos = int(self.settings.screen_height - (self.trade_state.stop_loss_price -
+            stop_ypos = int(self.settings.screen_height - (self.state.stop_loss_price -
                             self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET
             draw_horizontal_dashed_line(self.screen, STOP_LOSS_COLOUR, (
                 0, stop_ypos), (self.settings.screen_width - CHART_RIGHT_SPACING, stop_ypos))
-            for order_price in self.trade_state.order_prices:
+            for order_price in self.state.order_prices:
                 order_price_ypos = int(self.settings.screen_height - (order_price -
                              self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET
                 draw_horizontal_dashed_line(self.screen, ORDER_COLOUR, (
@@ -154,17 +154,17 @@ class Chart():
 
         
     def draw_history(self):
-        history_offset = self.settings.last_candle - self.settings.max_candles
-        for hist in self.settings.history:
+        history_offset = self.settings.last_candle - MAX_CANDLES
+        for hist in self.state.history:
             if int(hist[2]) >= history_offset and int(hist[2]) <= self.settings.last_candle:
                 history_open_xpos = self.settings.candle_spacing + \
                     (self.settings.candle_spacing + self.settings.candle_width) * \
-                    (self.settings.max_candles - (self.settings.last_candle - int(hist[0])))
+                    (MAX_CANDLES - (self.settings.last_candle - int(hist[0])))
                 history_open_trade_ypos = int(
                     self.settings.screen_height - (float(hist[1])-self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET
                 history_close_xpos = self.settings.candle_spacing + \
                     (self.settings.candle_spacing + self.settings.candle_width) * \
-                    (self.settings.max_candles - (self.settings.last_candle - int(hist[2])))
+                    (MAX_CANDLES - (self.settings.last_candle - int(hist[2])))
                 history_close_trade_ypos = int(
                     self.settings.screen_height - (float(hist[3])-self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET
                 history_colour = BULL_CANDLE_COLOUR if int(

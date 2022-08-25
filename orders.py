@@ -4,67 +4,67 @@ from constants import *
 from enums import TradeMode, OHLC
 
 class Orders():
-    def __init__(self, trade_state, settings):
-        self.trade_state = trade_state
+    def __init__(self, state, settings):
+        self.state = state
         self.settings = settings
         logging.basicConfig(level=logging.DEBUG)
 
     def trade(self, order_type=TradeMode.BUY):
         current_close_price = float(self.settings.data[self.settings.last_candle].split(',')[OHLC.CLOSEINDEX.value])
-        self.trade_state.order_prices.append(current_close_price)
+        self.state.order_prices.append(current_close_price)
         buy_or_sell = 1 if order_type==TradeMode.BUY else -1
-        if self.trade_state.average_price:
-            if (self.trade_state.position_size+self.settings.position_size*buy_or_sell) == 0:
-                self.trade_state.average_price = 0
+        if self.state.average_price:
+            if (self.state.position_size+self.settings.default_position_size*buy_or_sell) == 0:
+                self.state.average_price = 0
             else:
-                self.trade_state.average_price = (self.trade_state.average_price*self.trade_state.position_size + current_close_price*self.settings.position_size*buy_or_sell) \
-                                            / (self.trade_state.position_size+self.settings.position_size*buy_or_sell)
+                self.state.average_price = (self.state.average_price*self.state.position_size + current_close_price*self.settings.default_position_size*buy_or_sell) \
+                                            / (self.state.position_size+self.settings.default_position_size*buy_or_sell)
         else:
-            self.trade_state.average_price = current_close_price
-            self.trade_state.stop_loss_price = self.trade_state.average_price - (TRADE_RISK_PIPS * 0.0001)*buy_or_sell
+            self.state.average_price = current_close_price
+            self.state.stop_loss_price = self.state.average_price - (TRADE_RISK_PIPS * 0.0001)*buy_or_sell
 
-        self.trade_state.position_size += self.settings.position_size*buy_or_sell
-        self.trade_state.candle_number = self.settings.last_candle
-        if self.trade_state.position_size > 0:
-            self.trade_state.trade_mode = TradeMode.BUY
+        self.state.position_size += self.settings.default_position_size*buy_or_sell
+        self.state.candle_number = self.settings.last_candle
+        if self.state.position_size > 0:
+            self.state.trade_mode = TradeMode.BUY
         else:
-            self.trade_state.trade_mode = TradeMode.SELL
-        if self.trade_state.position_size == 0:
+            self.state.trade_mode = TradeMode.SELL
+        if self.state.position_size == 0:
             self.close(current_close_price)
 
     def close(self, close_price=None):
-        if self.trade_state.trade_mode != TradeMode.CLOSED:
-            self.settings.history.append([
-                self.trade_state.candle_number,
-                self.trade_state.average_price,
+        if self.state.trade_mode != TradeMode.CLOSED:
+            self.state.history.append([
+                self.state.candle_number,
+                self.state.average_price,
                 self.settings.last_candle,
                 close_price or self.settings.data[self.settings.last_candle].split(
                     ',')[OHLC.CLOSEINDEX.value],
-                self.trade_state.trade_mode.value
+                self.state.trade_mode.value
             ])
-            self.trade_state.trade_mode = TradeMode.CLOSED
-            self.trade_state.equity += self.trade_state.profit
-            self.trade_state.profit = 0
-            self.trade_state.order_prices = []
-            self.trade_state.position_size = 0
-            self.trade_state.stop_loss_price = 0
-            self.trade_state.pips = 0
-            self.trade_state.average_price = 0
+            self.state.trade_mode = TradeMode.CLOSED
+            self.state.equity += self.state.profit
+            self.state.profit = 0
+            self.state.order_prices = []
+            self.state.position_size = 0
+            self.state.stop_loss_price = 0
+            self.state.pips = 0
+            self.state.average_price = 0
 
     def check_orders(self):
         current_close_price = float(self.settings.data[self.settings.last_candle].split(',')[OHLC.CLOSEINDEX.value])
         current_high_price = float(self.settings.data[self.settings.last_candle].split(',')[OHLC.HIGHINDEX.value])
         current_low_price = float(self.settings.data[self.settings.last_candle].split(',')[OHLC.LOWINDEX.value])
-        if (self.trade_state.trade_mode == TradeMode.BUY):
-            self.trade_state.pips = (current_close_price - self.trade_state.average_price) * 10000-1
-            self.trade_state.profit = self.trade_state.pips * abs(self.trade_state.position_size)
-            if current_low_price <= self.trade_state.stop_loss_price:
+        if (self.state.trade_mode == TradeMode.BUY):
+            self.state.pips = (current_close_price - self.state.average_price) * 10000-1
+            self.state.profit = self.state.pips * abs(self.state.position_size)
+            if current_low_price <= self.state.stop_loss_price:
                 logging.debug('close buy check')
-                self.close(self.trade_state.stop_loss_price)
+                self.close(self.state.stop_loss_price)
 
-        if (self.trade_state.trade_mode == TradeMode.SELL):
-            self.trade_state.pips = (self.trade_state.average_price - current_close_price) * 10000-1
-            self.trade_state.profit = self.trade_state.pips * abs(self.trade_state.position_size)
-            if current_high_price >= self.trade_state.stop_loss_price:
+        if (self.state.trade_mode == TradeMode.SELL):
+            self.state.pips = (self.state.average_price - current_close_price) * 10000-1
+            self.state.profit = self.state.pips * abs(self.state.position_size)
+            if current_high_price >= self.state.stop_loss_price:
                 logging.debug('close sell check')
-                self.close(self.trade_state.stop_loss_price)
+                self.close(self.state.stop_loss_price)

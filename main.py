@@ -3,7 +3,7 @@
 from enums import TradeMode, OHLC
 from trade_state import TradeState
 from events import Events
-from load_data import LoadData
+from cache_management import CacheManagement
 from orders import Orders
 from chart import Chart
 from config import Config
@@ -31,32 +31,32 @@ class Trading():
     def __init__(self):
         pygame.init()
         pygame.font.init()
-        self.data = LoadData()
-        data = self.data.load_data()
-        self.settings = Settings(data=data)
-        self.trade_state = TradeState()
-        self.config = Config(self.settings.config_file, self.settings.history_file, self.trade_state)
+        self.settings = Settings()
+        self.state = TradeState()
+        self.config = Config(self.settings.config_file, self.state.history_file)
+        self.cache = CacheManagement(self.state)
         
         self.screen = pygame.display.set_mode(size=(
             1920, 1080), flags=pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE, depth=32, display=0)
         pygame.display.set_caption("Trading Simulator")
         self.settings.screen_width, self.settings.screen_height = pygame.display.get_surface().get_size()
         
-        self.text_display = TextDisplay(screen=self.screen, trade_state=self.trade_state, 
+        self.text_display = TextDisplay(screen=self.screen, state=self.state, 
                                         settings=self.settings)
-        self.trade_state.equity, self.settings.last_candle = self.config.read_config()
-        self.chart = Chart(screen=self.screen, trade_state=self.trade_state, settings=self.settings)
-        self.events = Events(trade_state=self.trade_state, settings=self.settings, config=self.config)
-        self.orders = Orders(trade_state=self.trade_state, settings=self.settings)
+        self.settings.data_dir, self.state.equity, self.settings.last_candle = self.config.read_config()
+        self.chart = Chart(screen=self.screen, state=self.state, settings=self.settings)
+        self.events = Events(state=self.state, settings=self.settings, config=self.config)
+        self.orders = Orders(state=self.state, settings=self.settings)
 
     def main_loop(self):
         """
         The loop that runs the app
         """
         try:
-            while not self.settings.done:
+            while not self.state.done:
                 self.events.process_events()
                 self.screen.fill((45, 45, 45))
+                self.cache.manage()
                 self.orders.check_orders()
                 self.text_display.draw_info_text()
                 if self.settings.showing_help:
@@ -75,8 +75,8 @@ class Trading():
         Draws the chart
         """
         try:
-            if self.settings.last_candle < self.settings.max_candles:
-                self.settings.last_candle = self.settings.max_candles
+            if self.settings.last_candle < MAX_CANDLES:
+                self.settings.last_candle = MAX_CANDLES
             self.chart.calc_high_low_price()
             self.chart.draw_price_lines()
             self.chart.draw_chart_data()
