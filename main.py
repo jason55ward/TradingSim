@@ -34,9 +34,8 @@ class Trading():
         self.settings = Settings()
         
         self.config = Config(self.settings.config_file, self.state.history_file)
-        self.state = TradeState()
-        self.state.date_time, self.state.equity = self.config.read_config()
-        self.cache = CacheManagement(self.state)
+        date_time, equity = self.config.read_config()
+        self.state = TradeState(date_time=date_time, equity=equity)
         
         self.screen = pygame.display.set_mode(size=(
             1920, 1080), flags=pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE, depth=32, display=0)
@@ -58,7 +57,7 @@ class Trading():
             while not self.state.done:
                 self.events.process_events()
                 self.screen.fill((45, 45, 45))
-                self.cache.manage()
+                self.state.manage()
                 self.orders.check_orders()
                 self.text_display.draw_info_text()
                 if self.settings.showing_help:
