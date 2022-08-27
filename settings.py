@@ -22,4 +22,4 @@ class Settings():
         self.show_history = False
         self.default_position_size = 1
         self.max_height = 0
-        self.min_height = 9999
+        self.min_height = 9999999

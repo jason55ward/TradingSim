@@ -18,23 +18,23 @@ class Events():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.config.write_config(self.state.date_time, self.state.equity)
-                    self.settings.done = True
+                    self.state.done = True
                 if event.key == pygame.K_DOWN:
                     self.settings.chart_pip_height += 20
                 if event.key == pygame.K_UP:
                     self.settings.chart_pip_height -= 20
                 if event.key == pygame.K_LEFT:
-                    self.settings.last_candle -= 1
-                    if self.settings.last_candle < MAX_CANDLES:
-                        self.settings.last_candle = MAX_CANDLES
+                    self.state.data_index -= 1
+                    if self.state.data_index < MAX_CANDLES:
+                        self.state.data_index = MAX_CANDLES
                 if event.key == pygame.K_RIGHT:
-                    self.settings.last_candle += 1
+                    self.state.data_index += 1
                 if event.key == pygame.K_PAGEUP:
-                    self.settings.last_candle += 3
+                    self.state.data_index += 3
                 if event.key == pygame.K_PAGEDOWN:
-                    self.settings.last_candle -= 3
-                    if self.settings.last_candle < MAX_CANDLES:
-                        self.settings.last_candle = MAX_CANDLES
+                    self.state.data_index -= 3
+                    if self.state.data_index < MAX_CANDLES:
+                        self.state.data_index = MAX_CANDLES
                 if event.key == pygame.K_h:
                     self.settings.show_history = not self.settings.show_history
                 if event.key == pygame.K_b:
@@ -47,22 +47,22 @@ class Events():
                     self.settings.showing_help = not self.settings.showing_help
                 if event.key == pygame.K_1:
                     self.state.time_frame = ONE_MINUTE
-                    self.settings.data = self.settings.one_minute_data
+                    self.state.data = self.settings.one_minute_data
                 if event.key == pygame.K_2:
                     self.state.time_frame = FIVE_MINUTES
-                    self.settings.data = self.settings.five_minute_data
+                    self.state.data = self.settings.five_minute_data
                 if event.key == pygame.K_3:
                     self.state.time_frame = FIFTEEN_MINUTES
-                    self.settings.data = self.settings.fifteen_minute_data
+                    self.state.data = self.settings.fifteen_minute_data
                 if event.key == pygame.K_4:
                     self.state.time_frame = ONE_HOUR
-                    self.settings.data = self.settings.one_hour_data
+                    self.state.data = self.settings.one_hour_data
                 if event.key == pygame.K_5:
                     self.state.time_frame = FOUR_HOUR
-                    self.settings.data = self.settings.four_hour_data
+                    self.state.data = self.settings.four_hour_data
                 if event.key == pygame.K_6:
                     self.state.time_frame = ONE_DAY
-                    self.settings.data = self.state.daily_data
+                    self.state.data = self.state.daily_data
                 if event.key == pygame.K_p:
                     price = (self.settings.screen_height - pygame.mouse.get_pos()[1] - CHART_TOP_Y_OFFSET)/self.settings.factor + self.settings.min_height
                     self.state.support.append(price)
@@ -80,7 +80,7 @@ class Events():
                     move = -15
                 elif rel < 0:
                     move = +15
-                self.settings.last_candle += move
+                self.state.data_index += move
             if event.type is QUIT:
-                self.config.write_config(self.settings.last_candle, self.state.history)
-                self.settings.done = True
+                self.config.write_config(self.state.date_time, self.state.equity, self.state.history)
+                self.state.done = True

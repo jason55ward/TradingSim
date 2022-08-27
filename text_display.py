@@ -7,25 +7,39 @@ class TextDisplay():
         self.settings = settings
 
     def draw_info_text(self):
-        last_candle_data_text = self.settings.font.render(
-            self.settings.data[self.settings.last_candle].replace('\n',''), 1, (FONT_COLOUR))
-        self.screen.blit(last_candle_data_text, (20, 20))
+        y_pos = 20
+        y_increment = 25
+        data_text = self.settings.font.render(
+            self.state.data[self.state.data_index].replace('\n',''), 1, (FONT_COLOUR))
+        self.screen.blit(data_text, (20, y_pos))
+        y_pos+=y_increment
+        date_time_text = self.settings.font.render(
+            str(self.state.date_time), 1, (FONT_COLOUR))
+        self.screen.blit(date_time_text, (20, y_pos))
+        y_pos+=y_increment
         equity_text = self.settings.font.render(f"Pre-Trade Balance: {'%.2f' % self.state.equity}", 1, (FONT_COLOUR))
-        self.screen.blit(equity_text, (20, 45))
+        self.screen.blit(equity_text, (20, y_pos))
+        y_pos+=y_increment
         equity_text = self.settings.font.render(f"Equity: {'%.2f' % (self.state.equity + self.state.profit)}", 1, (FONT_COLOUR))
-        self.screen.blit(equity_text, (20, 70))
+        self.screen.blit(equity_text, (20, y_pos))
+        y_pos+=y_increment
         profit_text = self.settings.font.render(f"Profit: {'%.2f' % self.state.profit}", 1, (FONT_COLOUR))
-        self.screen.blit(profit_text, (20, 95))
+        self.screen.blit(profit_text, (20, y_pos))
+        y_pos+=y_increment
         trade_mode_text = self.settings.font.render(f"Trade Mode: {self.state.trade_mode.name}", 1, (FONT_COLOUR))
-        self.screen.blit(trade_mode_text, (20, 120))
+        self.screen.blit(trade_mode_text, (20, y_pos))
+        y_pos+=y_increment
         position_size_text = self.settings.font.render(f"Position Size: {'%.2f' % self.state.position_size}", 1, (FONT_COLOUR))
-        self.screen.blit(position_size_text, (20, 145))
+        self.screen.blit(position_size_text, (20, y_pos))
+        y_pos+=y_increment
         help_text = self.settings.font.render("Press F1 to toggle help info ", 1, (FONT_COLOUR))
-        self.screen.blit(help_text, (20, 170))
+        self.screen.blit(help_text, (20, y_pos))
+        y_pos+=y_increment
         average_price_text = self.settings.font.render(f"Average Price: {self.state.average_price}", 1, (FONT_COLOUR))
-        self.screen.blit(average_price_text, (20, 195))
+        self.screen.blit(average_price_text, (20, y_pos))
+        y_pos+=y_increment
         timeframe_text = self.settings.font.render(f"Timeframe: {self.state.time_frame}", 1, (FONT_COLOUR))
-        self.screen.blit(timeframe_text, (20, 220))
+        self.screen.blit(timeframe_text, (20, y_pos))
 
     def displayHelp(self):
         text1 = "Move 1 candle: use left and right arrow."

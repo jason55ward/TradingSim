@@ -13,13 +13,13 @@ class Chart():
     def calc_high_low_price(self):
         try:
             self.settings.max_height = 0
-            self.settings.min_height = 9999
+            self.settings.min_height = 9999999
             for x in range(0, MAX_CANDLES):
-                offset = self.state.one_minute_index-x
-                high = float(self.state.data[offset].split(',')[OHLC.HIGHINDEX.value])
+                offset = self.state.data_index-x
+                high = float(self.state.data[offset].split(DATA_DELIMITER)[OHLC.HIGHINDEX.value])
                 if high > self.settings.max_height:
                     self.settings.max_height = high
-                low = float(self.settings.data[offset].split(',')[OHLC.LOWINDEX.value])
+                low = float(self.state.data[offset].split(DATA_DELIMITER)[OHLC.LOWINDEX.value])
                 if low < self.settings.min_height:
                     self.settings.min_height = low
             self.settings.factor = (self.settings.screen_height - CHART_TOP_Y_OFFSET) / \
@@ -29,7 +29,7 @@ class Chart():
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(exc_type, fname, exc_tb.tb_lineno)
             print(sys.exc_info())
-            print(self.settings.last_candle)
+            print(self.state.data_index)
 
     def draw_price_lines(self):
         try:
@@ -57,28 +57,28 @@ class Chart():
     def draw_chart_data(self):
         try:
             for x in range(0, MAX_CANDLES):
-                offset = self.settings.last_candle-x
+                offset = self.state.data_index-x
                 if x == -1:
                     #currently not working because data is dirty and switching between timeframes doesn't correlate mathematically for line numbers
                     continue
-                    minutes_outstanding = self.settings.last_candle % self.state.time_frame
+                    minutes_outstanding = self.state.data_index % self.state.time_frame
                     print(minutes_outstanding)
                     if minutes_outstanding == 0: 
                         continue
                     offset+=2
                     xpos = self.settings.candle_spacing + \
                         (self.settings.candle_spacing + self.settings.candle_width) * (MAX_CANDLES+1)
-                    open_price = float(self.settings.bid[offset].split(',')[
+                    open_price = float(self.settings.bid[offset].split(DATA_DELIMITER)[
                                     OHLC.OPENINDEX.value])
-                    close_price = float(self.settings.bid[offset+minutes_outstanding].split(',')[
+                    close_price = float(self.settings.bid[offset+minutes_outstanding].split(DATA_DELIMITER)[
                                         OHLC.CLOSEINDEX.value])
                     high_price=0
                     low_price=999999
                     for minute in range(minutes_outstanding):
-                        temp_high_price = float(self.settings.bid[offset+minute].split(',')[OHLC.HIGHINDEX.value])
+                        temp_high_price = float(self.settings.bid[offset+minute].split(DATA_DELIMITER)[OHLC.HIGHINDEX.value])
                         if temp_high_price > high_price:
                             high_price = temp_high_price
-                        temp_low_price = float(self.settings.bid[offset+minute].split(',')[OHLC.LOWINDEX.value])
+                        temp_low_price = float(self.settings.bid[offset+minute].split(DATA_DELIMITER)[OHLC.LOWINDEX.value])
                         if temp_low_price < low_price:
                             low_price = temp_low_price
                         print(high_price)
@@ -87,12 +87,12 @@ class Chart():
                 else:
                     xpos = self.settings.candle_spacing + \
                         (self.settings.candle_spacing + self.settings.candle_width) * (MAX_CANDLES-x)
-                    open_price = float(self.settings.data[offset].split(',')[
+                    open_price = float(self.state.data[offset].split(DATA_DELIMITER)[
                                     OHLC.OPENINDEX.value])
-                    high_price = float(self.settings.data[offset].split(',')[
+                    high_price = float(self.state.data[offset].split(DATA_DELIMITER)[
                                     OHLC.HIGHINDEX.value])
-                    low_price = float(self.settings.data[offset].split(',')[OHLC.LOWINDEX.value])
-                    close_price = float(self.settings.data[offset].split(',')[
+                    low_price = float(self.state.data[offset].split(DATA_DELIMITER)[OHLC.LOWINDEX.value])
+                    close_price = float(self.state.data[offset].split(DATA_DELIMITER)[
                                         OHLC.CLOSEINDEX.value])
 
                 candle_open_ypos = int(
@@ -133,7 +133,7 @@ class Chart():
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(exc_type, fname, exc_tb.tb_lineno)
             print(sys.exc_info())
-            print(self.settings.last_candle)
+            print(self.state.data_index)
             print(offset)
     
     def draw_orders(self):
@@ -154,17 +154,17 @@ class Chart():
 
         
     def draw_history(self):
-        history_offset = self.settings.last_candle - MAX_CANDLES
+        history_offset = self.state.data_index - MAX_CANDLES
         for hist in self.state.history:
-            if int(hist[2]) >= history_offset and int(hist[2]) <= self.settings.last_candle:
+            if int(hist[2]) >= history_offset and int(hist[2]) <= self.state.data_index:
                 history_open_xpos = self.settings.candle_spacing + \
                     (self.settings.candle_spacing + self.settings.candle_width) * \
-                    (MAX_CANDLES - (self.settings.last_candle - int(hist[0])))
+                    (MAX_CANDLES - (self.state.data_index - int(hist[0])))
                 history_open_trade_ypos = int(
                     self.settings.screen_height - (float(hist[1])-self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET
                 history_close_xpos = self.settings.candle_spacing + \
                     (self.settings.candle_spacing + self.settings.candle_width) * \
-                    (MAX_CANDLES - (self.settings.last_candle - int(hist[2])))
+                    (MAX_CANDLES - (self.state.data_index - int(hist[2])))
                 history_close_trade_ypos = int(
                     self.settings.screen_height - (float(hist[3])-self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET
                 history_colour = BULL_CANDLE_COLOUR if int(

@@ -10,7 +10,7 @@ class Orders():
         logging.basicConfig(level=logging.DEBUG)
 
     def trade(self, order_type=TradeMode.BUY):
-        current_close_price = float(self.settings.data[self.settings.last_candle].split(',')[OHLC.CLOSEINDEX.value])
+        current_close_price = float(self.state.data[self.state.data_index].split(DATA_DELIMITER)[OHLC.CLOSEINDEX.value])
         self.state.order_prices.append(current_close_price)
         buy_or_sell = 1 if order_type==TradeMode.BUY else -1
         if self.state.average_price:
@@ -36,8 +36,8 @@ class Orders():
             # self.state.history.append([
             #     self.state.candle_number,
             #     self.state.average_price,
-            #     self.settings.last_candle,
-            #     close_price or self.settings.data[self.settings.last_candle].split(
+            #     self.state.data_index,
+            #     close_price or self.state.data[self.state.data_index].split(
             #         ',')[OHLC.CLOSEINDEX.value],
             #     self.state.trade_mode.value
             # ])
@@ -51,9 +51,9 @@ class Orders():
             self.state.average_price = 0
 
     def check_orders(self):
-        current_close_price = float(self.settings.data[self.settings.last_candle].split(',')[OHLC.CLOSEINDEX.value])
-        current_high_price = float(self.settings.data[self.settings.last_candle].split(',')[OHLC.HIGHINDEX.value])
-        current_low_price = float(self.settings.data[self.settings.last_candle].split(',')[OHLC.LOWINDEX.value])
+        current_close_price = float(self.state.data[self.state.data_index].split(DATA_DELIMITER)[OHLC.CLOSEINDEX.value])
+        current_high_price = float(self.state.data[self.state.data_index].split(DATA_DELIMITER)[OHLC.HIGHINDEX.value])
+        current_low_price = float(self.state.data[self.state.data_index].split(DATA_DELIMITER)[OHLC.LOWINDEX.value])
         if (self.state.trade_mode == TradeMode.BUY):
             self.state.pips = (current_close_price - self.state.average_price) * 10000-1
             self.state.profit = self.state.pips * abs(self.state.position_size)

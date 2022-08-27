@@ -8,17 +8,14 @@ class Config():
         self.history_file = history_file
 
     def read_config(self):
-        equity = None
-        date_time = None
+        date_time = DEFAULT_DATE_TIME
+        equity = DEFAULT_EQUITY
         if os.path.exists(self.config_file):
             with open(self.config_file) as config_file:
                 data = config_file.readlines()
                 if data:
                     date_time = data[0].split('=')[1].rstrip()
                     equity = float(data[1].split('=')[1].rstrip())
-                else:
-                    date_time = DEFAULT_DATE_TIME
-                    equity = DEFAULT_EQUITY
             # if os.path.exists(self.history_file):
             #     with open(self.history_file) as config_file:
             #         data = config_file.readlines()

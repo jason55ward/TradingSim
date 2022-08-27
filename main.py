@@ -3,7 +3,6 @@
 from enums import TradeMode, OHLC
 from trade_state import TradeState
 from events import Events
-from cache_management import CacheManagement
 from orders import Orders
 from chart import Chart
 from config import Config
@@ -33,7 +32,7 @@ class Trading():
         pygame.font.init()
         self.settings = Settings()
         
-        self.config = Config(self.settings.config_file, self.state.history_file)
+        self.config = Config(self.settings.config_file, self.settings.history_file)
         date_time, equity = self.config.read_config()
         self.state = TradeState(date_time=date_time, equity=equity)
         
@@ -56,7 +55,7 @@ class Trading():
         try:
             while not self.state.done:
                 self.events.process_events()
-                self.screen.fill((45, 45, 45))
+                self.screen.fill(SCREEN_RGB)
                 self.state.manage()
                 self.orders.check_orders()
                 self.text_display.draw_info_text()
@@ -64,7 +63,7 @@ class Trading():
                     self.text_display.displayHelp()
                 self.draw_chart()
                 pygame.display.flip()
-                self.first_run = False
+                self.settings.first_run = False
         except:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -76,8 +75,6 @@ class Trading():
         Draws the chart
         """
         try:
-            if self.settings.last_candle < MAX_CANDLES:
-                self.settings.last_candle = MAX_CANDLES
             self.chart.calc_high_low_price()
             self.chart.draw_price_lines()
             self.chart.draw_chart_data()

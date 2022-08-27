@@ -4,7 +4,7 @@ from constants import *
 import zipfile
 from dateutil import parser
 
-
+#20110131 235756;1286.000000;0
 def load_ticks(date_time):
     currency_dir = os.path.join(DATA_DIR, CURRENCY_PAIR)
     tick_dir = os.path.join(currency_dir, TICK_DIR_NAME)
@@ -24,6 +24,7 @@ def load_ticks(date_time):
 
     return ticks
 
+#20130102 060000;1423.000000;1442.750000;1423.000000;1440.000000;0
 def load_minutes(date_time):
     currency_dir = os.path.join(DATA_DIR, CURRENCY_PAIR)
     minute_dir = os.path.join(currency_dir, ONE_MINUTE_DIR_NAME)
