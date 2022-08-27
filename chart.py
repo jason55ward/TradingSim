@@ -15,8 +15,8 @@ class Chart():
             self.settings.max_height = 0
             self.settings.min_height = 9999
             for x in range(0, MAX_CANDLES):
-                offset = self.settings.last_candle-x
-                high = float(self.settings.data[offset].split(',')[OHLC.HIGHINDEX.value])
+                offset = self.state.one_minute_index-x
+                high = float(self.state.data[offset].split(',')[OHLC.HIGHINDEX.value])
                 if high > self.settings.max_height:
                     self.settings.max_height = high
                 low = float(self.settings.data[offset].split(',')[OHLC.LOWINDEX.value])

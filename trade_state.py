@@ -35,41 +35,36 @@ class TradeState:
         self.history = []
 
         self.tick_data = load_ticks(self.date_time)
-        self.tick_index = 0
+        #self.tick_index = find_current_date_time_index(self.date_time, self.tick_data)
         self.one_minute_data = load_minutes(self.date_time)
-        self.one_minute_index = 0
+        #self.one_minute_index = find_current_date_time_index(self.date_time, self.one_minute_data)
 
     def find_current_date_time_index(self, date_time, data_stream):
-        index = len(data_stream)
-        last_index = 0
-        differential = index//2
         index = 0
-        while differential > 10000:
-            last_index = index
-            line_date_time = parser.parse(data_stream[index+differential].split(';', 1)[0])
-            if date_time > line_date_time:
-                index = differential + differential//2
-            elif date_time < line_date_time:
-                index = differential - differential//2
-            print(index)
+        increment = len(data_stream)//50
+        while index < len(data_stream):
+            line_date_time = parser.parse(data_stream[index].split(';', 1)[0])
+            if date_time < line_date_time:
+                index -= increment
+                line_date_time = parser.parse(data_stream[index].split(';', 1)[0])
+                break
+            index += increment
 
-        print(index)
-        # for i, line in enumerate(data_stream, start=index):
-        #     line_date_time = parser.parse(line.split(';', 1)[0])
-        #     # print(i-index)
-        #     if line_date_time >= date_time:
-        #         return i-index
+        for i, line in enumerate(data_stream[index:], start=index):
+            line_date_time = parser.parse(line.split(';', 1)[0])
+            if date_time <= line_date_time:
+                return i-1
+
+    def generate_time_frame(self, time_frame, data_stream):
+        pass
 
     def manage(self):
         pass
 
 
-datetime = '2015-05-03 000000'
-state = TradeState(datetime, 50)
-datetime = parser.parse(datetime)
-# tick_line = state.find_current_date_time_index(datetime, state.tick_data)
-# print(tick_line)
-# print(state.tick_data[tick_line])
-minute_line = state.find_current_date_time_index(datetime, state.one_minute_data)
-# print(minute_line)
-# print(state.one_minute_data[minute_line])
+if __name__ == "__main__":
+    datetime = '2015-05-03 000000'
+    state = TradeState(datetime, 50)
+    datetime = parser.parse(datetime)
+    tick_index  = state.find_current_date_time_index(datetime, state.tick_data)
+    minute_index = state.find_current_date_time_index(datetime, state.one_minute_data)
