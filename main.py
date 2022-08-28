@@ -36,9 +36,8 @@ class Trading():
         date_time, equity = self.config.read_config()
         self.state = TradeState(date_time=date_time, equity=equity)
         
-        self.screen = pygame.display.set_mode(size=(
-            1920, 1080), flags=pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE, depth=32, display=0)
-        pygame.display.set_caption("Trading Simulator")
+        self.screen = pygame.display.set_mode(size=SCREEN_SIZE, flags=pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE, depth=32, display=0)
+        pygame.display.set_caption(APP_NAME)
         self.settings.screen_width, self.settings.screen_height = pygame.display.get_surface().get_size()
         
         self.text_display = TextDisplay(screen=self.screen, state=self.state, 

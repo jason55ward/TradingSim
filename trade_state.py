@@ -65,9 +65,12 @@ class TradeState:
         pass
 
     def manage(self):
-        #if datetime.now()-self.date_time_offset >= self.one_minute_data[self.one_minute_index]:
-        #    self.one_minute_index+=1
-        pass
+        next_file_date_time = parser.parse(self.data[self.data_index+1].split(DATA_DELIMITER)[0])
+        self.date_time = datetime.now()-self.date_time_offset
+        if self.date_time >= next_file_date_time:
+            self.one_minute_index+=1
+            self.data_index = self.one_minute_index
+        
 
 
 if __name__ == "__main__":
