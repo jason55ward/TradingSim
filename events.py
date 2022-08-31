@@ -26,21 +26,20 @@ class Events():
                     self.settings.chart_pip_height -= 20
                 if event.key == pygame.K_LEFT:
                     self.state.data_index -= self.state.time_frame
-                    self.state.one_minute_index -= self.state.time_frame
-                    b = self.state.date_time_offset 
                     self.state.date_time_offset += datetime.timedelta(minutes=self.state.time_frame
                                                     + self.state.date_time.minute%self.state.time_frame)
                     if self.state.data_index < MAX_CANDLES:
                         self.state.data_index = MAX_CANDLES
                 if event.key == pygame.K_RIGHT:
                     self.state.data_index += self.state.time_frame
-                    self.state.one_minute_index += 1
                     self.state.date_time_offset -= datetime.timedelta(minutes=self.state.time_frame
                                                     + self.state.date_time.minute%self.state.time_frame)
                 if event.key == pygame.K_PAGEUP:
+                    self.state.data_index += self.state.time_frame
                     self.state.date_time_offset -= datetime.timedelta(minutes=self.state.time_frame
                                                     + self.state.date_time.minute%self.state.time_frame)
                 if event.key == pygame.K_PAGEDOWN:
+                    self.state.data_index -= self.state.time_frame
                     self.state.date_time_offset += datetime.timedelta(minutes=self.state.time_frame
                                                     + self.state.date_time.minute%self.state.time_frame)
                     if self.state.data_index < MAX_CANDLES:
