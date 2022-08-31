@@ -123,6 +123,7 @@ class TradeState:
                 high_5_min = float(self.one_minute_data[index].split(DATA_DELIMITER)[OHLC.HIGHINDEX.value])
                 low_5_min = float(self.one_minute_data[index].split(DATA_DELIMITER)[OHLC.LOWINDEX.value])
             if (date_time.minute - base_15_min) > (FIFTEEN_MINUTES - 1):
+                break
                 record = self.one_minute_data[index-1].split(DATA_DELIMITER)
                 record[0] = date_time - datetime.timedelta(minutes=date_time.minute%FIFTEEN_MINUTES+FIFTEEN_MINUTES)
                 record[1] = open_15_min
@@ -182,7 +183,7 @@ class TradeState:
         # next_one_hour_date_time = parser.parse(self.one_hour_data[self.one_hour_index+1].split(DATA_DELIMITER)[0])
         # next_four_hour_date_time = parser.parse(self.four_hour_data[self.four_hour_index+1].split(DATA_DELIMITER)[0])
         # next_daily_date_time = parser.parse(self.daily_data[self.daily_index+1].split(DATA_DELIMITER)[0])
-        # self.date_time = datetime.now()-self.date_time_offset
+        self.date_time = datetime.datetime.now()-self.date_time_offset
         if self.date_time >= next_date_time:
             self.data_index += 1
         if self.date_time >= next_tick_date_time:
