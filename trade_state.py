@@ -177,28 +177,28 @@ class TradeState:
         next_date_time = parser.parse(self.data[self.data_index+1].split(DATA_DELIMITER)[0])
         next_tick_date_time = parser.parse(self.tick_data[self.tick_index+1].split(DATA_DELIMITER)[0])
         next_one_min_date_time = parser.parse(self.one_minute_data[self.one_minute_index+1].split(DATA_DELIMITER)[0])
-        next_five_min_date_time = parser.parse(self.five_minute_data[self.five_minute_index+1].split(DATA_DELIMITER)[0])
-        next_fifteen_min_date_time = parser.parse(self.fifteen_minute_data[self.fifteen_minute_index+1].split(DATA_DELIMITER)[0])
-        next_one_hour_date_time = parser.parse(self.one_hour_data[self.one_hour_index+1].split(DATA_DELIMITER)[0])
-        next_four_hour_date_time = parser.parse(self.four_hour_data[self.four_hour_index+1].split(DATA_DELIMITER)[0])
-        next_daily_date_time = parser.parse(self.daily_data[self.daily_index+1].split(DATA_DELIMITER)[0])
-        self.date_time = datetime.now()-self.date_time_offset
+        # next_five_min_date_time = parser.parse(self.five_minute_data[self.five_minute_index+1].split(DATA_DELIMITER)[0])
+        # next_fifteen_min_date_time = parser.parse(self.fifteen_minute_data[self.fifteen_minute_index+1].split(DATA_DELIMITER)[0])
+        # next_one_hour_date_time = parser.parse(self.one_hour_data[self.one_hour_index+1].split(DATA_DELIMITER)[0])
+        # next_four_hour_date_time = parser.parse(self.four_hour_data[self.four_hour_index+1].split(DATA_DELIMITER)[0])
+        # next_daily_date_time = parser.parse(self.daily_data[self.daily_index+1].split(DATA_DELIMITER)[0])
+        # self.date_time = datetime.now()-self.date_time_offset
         if self.date_time >= next_date_time:
             self.data_index += 1
         if self.date_time >= next_tick_date_time:
             self.tick_index += 1
         if self.date_time >= next_one_min_date_time:
             self.one_minute_index += 1
-        if self.date_time >= next_five_min_date_time:
-            self.five_minute_index += 1
-        if self.date_time >= next_fifteen_min_date_time:
-            self.fifteen_minute_index += 1
-        if self.date_time >= next_one_hour_date_time:
-            self.one_hour_index += 1
-        if self.date_time >= next_four_hour_date_time:
-            self.four_hour_index += 1
-        if self.date_time >= next_daily_date_time:
-            self.daily_index += 1
+        # if self.date_time >= next_five_min_date_time:
+        #     self.five_minute_index += 1
+        # if self.date_time >= next_fifteen_min_date_time:
+        #     self.fifteen_minute_index += 1
+        # if self.date_time >= next_one_hour_date_time:
+        #     self.one_hour_index += 1
+        # if self.date_time >= next_four_hour_date_time:
+        #     self.four_hour_index += 1
+        # if self.date_time >= next_daily_date_time:
+        #     self.daily_index += 1
         
 
 
