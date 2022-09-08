@@ -162,14 +162,14 @@ class TradeState:
 
     def manage(self):
         try:
-            self.data_index = 0
-            next_date_time = parser.parse(self.minute_data[self.minute_index+1].split(DATA_DELIMITER)[0])
-            self.date_time = datetime.datetime.now()-self.date_time_offset #adjusted date_time to program date_time
+            #self.data_index = 0
+            #next_date_time = parser.parse(self.minute_data[self.minute_index+1].split(DATA_DELIMITER)[0])
+            #self.date_time = datetime.datetime.now()-self.date_time_offset #adjusted date_time to program date_time
             #move to next if time surpasses but if the next is too far in the future, jump to the future
             #This filters out all the missing data
-            if self.date_time >= next_date_time or self.date_time+datetime.timedelta(minutes=self.time_frame) < next_date_time:
-                self.minute_index += 1
-                self.date_time_offset = datetime.datetime.now() - next_date_time
+            # if self.date_time >= next_date_time or self.date_time+datetime.timedelta(minutes=self.time_frame) < next_date_time:
+            #     self.minute_index += 1
+            #     self.date_time_offset = datetime.datetime.now() - next_date_time
 
             curr_record = self.minute_data[self.minute_index].split(DATA_DELIMITER)
             bar_open_dt = parser.parse(curr_record[0]) - datetime.timedelta(minutes=parser.parse(curr_record[0]).minute % self.time_frame)

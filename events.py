@@ -24,18 +24,20 @@ class Events():
                     self.settings.chart_pip_height += 20
                 if event.key == pygame.K_UP:
                     self.settings.chart_pip_height -= 20
-                # if event.key == pygame.K_LEFT:
-                #     self.state.minute_index -= 1
-                #     self.state.date_time_offset += datetime.timedelta(minutes=1)
-                #                                     #+ self.state.date_time.minute%self.state.time_frame)
+                if event.key == pygame.K_LEFT:
+                    self.state.minute_index -= 1
+                    del self.state.data[self.state.time_frame][0]
+                    self.state.date_time_offset += datetime.timedelta(minutes=1)
+                                                    #+ self.state.date_time.minute%self.state.time_frame)
                 if event.key == pygame.K_RIGHT:
                     self.state.minute_index += 1
                     self.state.date_time_offset -= datetime.timedelta(minutes=1)
                                                     #+ self.state.date_time.minute%self.state.time_frame)
-                # if event.key == pygame.K_PAGEDOWN:
-                #     self.state.minute_index -= self.state.time_frame
-                #     self.state.date_time_offset += datetime.timedelta(minutes=self.state.time_frame
-                #                                     + self.state.date_time.minute%self.state.time_frame)
+                if event.key == pygame.K_PAGEDOWN:
+                    self.state.minute_index -= self.state.time_frame
+                    del self.state.data[self.state.time_frame][0]
+                    self.state.date_time_offset += datetime.timedelta(minutes=self.state.time_frame
+                                                    + self.state.date_time.minute%self.state.time_frame)
                 if event.key == pygame.K_PAGEUP:
                     self.state.minute_index += self.state.time_frame
                     self.state.date_time_offset -= datetime.timedelta(minutes=self.state.time_frame)
