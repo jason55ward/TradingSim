@@ -178,51 +178,52 @@ class TradeState:
             #set up the draw list
             if self.time_frame not in self.data:
                 self.data[self.time_frame] = [curr_record]
-                self.data[self.time_frame][0][0] = bar_open_dt
-            elif bar_open_dt > self.data[self.time_frame][0][0]:
+                self.data[self.time_frame][0][OHLC.DATETIMEINDEX.value] = bar_open_dt
+            elif bar_open_dt > self.data[self.time_frame][0][OHLC.DATETIMEINDEX.value]:
                 self.data[self.time_frame].insert(0, curr_record)
-                self.data[self.time_frame][0][0] = bar_open_dt
-            high = curr_record[2]
-            low = curr_record[3]
-            close = curr_record[4]
+                self.data[self.time_frame][0][OHLC.DATETIMEINDEX.value] = bar_open_dt
+            high = curr_record[OHLC.HIGHINDEX.value]
+            low = curr_record[OHLC.LOWINDEX.value]
+            close = curr_record[OHLC.CLOSEINDEX.value]
 
             candle_count = 0
             offset = 0
             while candle_count < MAX_CANDLES:
                 curr_record = self.minute_data[self.minute_index-offset].split(DATA_DELIMITER)
-                curr_dt = parser.parse(curr_record[0])
+                curr_dt = parser.parse(curr_record[OHLC.DATETIMEINDEX.value])
                 prev_record = self.minute_data[self.minute_index-offset-1].split(DATA_DELIMITER)
-                prev_dt = parser.parse(prev_record[0])
+                prev_dt = parser.parse(prev_record[OHLC.DATETIMEINDEX.value])
                 dt_diff = (curr_dt - prev_dt).total_seconds() // 60
                 if dt_diff < 1:
                     raise Exception("DT DIFF IS TOO SMALL")
-                if high < curr_record[2]:
-                    high = curr_record[2]
-                elif low > curr_record[3]:
-                    low = curr_record[3]
-                self.data[self.time_frame][insert_index-1][4] = curr_record[4]
+                if high < curr_record[OHLC.HIGHINDEX.value]:
+                    high = curr_record[OHLC.HIGHINDEX.value]
+                elif low > curr_record[OHLC.LOWINDEX.value]:
+                    low = curr_record[OHLC.LOWINDEX.value]
+                self.data[self.time_frame][insert_index-1][4] = curr_record[OHLC.CLOSEINDEX.value]
                 #add bar
                 if prev_dt < bar_open_dt:
                     #set OHL price before moving to next bar
-                    self.data[self.time_frame][insert_index-1][1] = curr_record[1] 
-                    self.data[self.time_frame][insert_index-1][4] = close
-                    if curr_record[1] > high:
-                        high = curr_record[1]
-                    if curr_record[1] < low:
-                        low = curr_record[1]
-                    self.data[self.time_frame][insert_index-1][2] = high
-                    self.data[self.time_frame][insert_index-1][3] = low
+                    open_value = curr_record[OHLC.OPENINDEX.value]
+                    self.data[self.time_frame][insert_index-1][OHLC.OPENINDEX.value] = open_value
+                    self.data[self.time_frame][insert_index-1][OHLC.CLOSEINDEX.value] = close
+                    if open_value > high:
+                        high = open_value
+                    if open_value < low:
+                        low = open_value
+                    self.data[self.time_frame][insert_index-1][OHLC.HIGHINDEX.value] = high
+                    self.data[self.time_frame][insert_index-1][OHLC.LOWINDEX.value] = low
 
                     bar_open_dt = prev_dt - datetime.timedelta(minutes=prev_dt.minute % self.time_frame)
                     if (insert_index < len(self.data[self.time_frame])
-                        and bar_open_dt <= self.data[self.time_frame][insert_index][0]):
+                        and bar_open_dt <= self.data[self.time_frame][insert_index][OHLC.DATETIMEINDEX.value]):
                             break
                     self.data[self.time_frame].insert(insert_index, prev_record) #close is implicitly fixed because we're currently at the last minute of bar
-                    self.data[self.time_frame][insert_index][0] = bar_open_dt
+                    self.data[self.time_frame][insert_index][OHLC.DATETIMEINDEX.value] = bar_open_dt
                     insert_index+=1
-                    high = prev_record[2]
-                    low = prev_record[3]
-                    close = prev_record[4]
+                    high = prev_record[OHLC.HIGHINDEX.value]
+                    low = prev_record[OHLC.LOWINDEX.value]
+                    close = prev_record[OHLC.CLOSEINDEX.value]
                     candle_count+=1
                 offset+=1
         except:

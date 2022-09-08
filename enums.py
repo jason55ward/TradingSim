@@ -10,6 +10,7 @@ class TradeMode(Enum):
 
 class OHLC(Enum):
     """Enum for picking Open High Low Close data from the bid and ask lists"""
+    DATETIMEINDEX = 0
     OPENINDEX = 1
     HIGHINDEX = 2
     LOWINDEX = 3
