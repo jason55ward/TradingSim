@@ -15,11 +15,11 @@ class Chart():
             self.settings.max_height = 0
             self.settings.min_height = 9999999
             for x in range(0, MAX_CANDLES):
-                offset = self.state.data_index-x
-                high = float(self.state.data[offset].split(DATA_DELIMITER)[OHLC.HIGHINDEX.value])
+                offset = x#self.state.data_index-x
+                high = float(self.state.data[self.state.time_frame][offset][OHLC.HIGHINDEX.value])
                 if high > self.settings.max_height:
                     self.settings.max_height = high
-                low = float(self.state.data[offset].split(DATA_DELIMITER)[OHLC.LOWINDEX.value])
+                low = float(self.state.data[self.state.time_frame][offset][OHLC.LOWINDEX.value])
                 if low < self.settings.min_height:
                     self.settings.min_height = low
             self.settings.factor = (self.settings.screen_height - CHART_TOP_Y_OFFSET) / \
@@ -57,43 +57,13 @@ class Chart():
     def draw_chart_data(self):
         try:
             for x in range(0, MAX_CANDLES):
-                offset = self.state.data_index-x
-                if x == -1:
-                    #currently not working because data is dirty and switching between timeframes doesn't correlate mathematically for line numbers
-                    continue
-                    minutes_outstanding = self.state.data_index % self.state.time_frame
-                    print(minutes_outstanding)
-                    if minutes_outstanding == 0: 
-                        continue
-                    offset+=2
-                    xpos = self.settings.candle_spacing + \
-                        (self.settings.candle_spacing + self.settings.candle_width) * (MAX_CANDLES+1)
-                    open_price = float(self.settings.bid[offset].split(DATA_DELIMITER)[
-                                    OHLC.OPENINDEX.value])
-                    close_price = float(self.settings.bid[offset+minutes_outstanding].split(DATA_DELIMITER)[
-                                        OHLC.CLOSEINDEX.value])
-                    high_price=0
-                    low_price=999999
-                    for minute in range(minutes_outstanding):
-                        temp_high_price = float(self.settings.bid[offset+minute].split(DATA_DELIMITER)[OHLC.HIGHINDEX.value])
-                        if temp_high_price > high_price:
-                            high_price = temp_high_price
-                        temp_low_price = float(self.settings.bid[offset+minute].split(DATA_DELIMITER)[OHLC.LOWINDEX.value])
-                        if temp_low_price < low_price:
-                            low_price = temp_low_price
-                        print(high_price)
-                        print(low_price)
-                    
-                else:
-                    xpos = self.settings.candle_spacing + \
-                        (self.settings.candle_spacing + self.settings.candle_width) * (MAX_CANDLES-x)
-                    open_price = float(self.state.data[offset].split(DATA_DELIMITER)[
-                                    OHLC.OPENINDEX.value])
-                    high_price = float(self.state.data[offset].split(DATA_DELIMITER)[
-                                    OHLC.HIGHINDEX.value])
-                    low_price = float(self.state.data[offset].split(DATA_DELIMITER)[OHLC.LOWINDEX.value])
-                    close_price = float(self.state.data[offset].split(DATA_DELIMITER)[
-                                        OHLC.CLOSEINDEX.value])
+                offset = x#self.state.data_index-x
+                xpos = self.settings.candle_spacing + \
+                    (self.settings.candle_spacing + self.settings.candle_width) * (MAX_CANDLES-x)
+                open_price = float(self.state.data[self.state.time_frame][offset][OHLC.OPENINDEX.value])
+                high_price = float(self.state.data[self.state.time_frame][offset][OHLC.HIGHINDEX.value])
+                low_price = float(self.state.data[self.state.time_frame][offset][OHLC.LOWINDEX.value])
+                close_price = float(self.state.data[self.state.time_frame][offset][OHLC.CLOSEINDEX.value])
 
                 candle_open_ypos = int(
                     self.settings.screen_height - (open_price-self.settings.min_height) * self.settings.factor) - CHART_TOP_Y_OFFSET

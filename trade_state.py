@@ -3,7 +3,7 @@ from load_data import load_ticks, load_minutes
 from constants import *
 from dateutil import parser
 import datetime
-import os
+import os, sys
 
 class TradeState:
     """"Keeps track of the current state"""
@@ -19,32 +19,20 @@ class TradeState:
         self.position_size = 0
         self.stop_loss_price = 0
         self.pips = 0
-        self.time_frame = 1
-        self.data = []
-        self.data_index = None
+        self.time_frame = 5
+        self.data = {}
+        self.data_index = {}
         self.tick_data = []
         self.tick_index = None
-        self.one_minute_data = []
-        self.one_minute_index = None
-        self.five_minute_data = []
-        self.five_minute_index = None
-        self.fifteen_minute_data = []
-        self.fifteen_minute_index = None
-        self.one_hour_data = []
-        self.one_hour_index = None
-        self.four_hour_data = []
-        self.four_hour_index = None
-        self.daily_data = []
-        self.daily_index = None
+        self.minute_data = []
+        self.minute_index = None
         self.support = []
         self.history = []
 
-        self.tick_data = load_ticks(self.date_time)
-        self.tick_index = self.find_current_date_time_index(self.date_time, self.tick_data)
-        self.one_minute_data = load_minutes(self.date_time)
-        self.one_minute_index = self.find_current_date_time_index(self.date_time, self.one_minute_data)
-        self.data = self.one_minute_data
-        self.data_index = self.one_minute_index
+        # self.tick_data = load_ticks(self.date_time)
+        # self.tick_index = self.find_current_date_time_index(self.date_time, self.tick_data)
+        self.minute_data = load_minutes(self.date_time)
+        self.minute_index = self.find_current_date_time_index(self.date_time, self.minute_data)
 
     def find_current_date_time_index(self, date_time, data_stream):
         index = 0
@@ -63,38 +51,38 @@ class TradeState:
                 return i-1
 
     def generate_time_frames(self):
-        base_minute = parser.parse(self.one_minute_data[0].split(DATA_DELIMITER)[0]).minute
+        date_time = parser.parse(self.one_minute_data[0].split(DATA_DELIMITER)[0]).minute
+        zeroed_date_time = date_time - datetime.timedelta(minutes=date_time.minute%FIVE_MINUTES)
+        zeroed_record = self.one_minute_data[0].split(DATA_DELIMITER)
+        zeroed_record[0] = zeroed_date_time
+        self.five_minute_data.append(zeroed_record)
+        self.fifteen_minute_data.append(zeroed_record)
+        self.one_hour_data.append(zeroed_record)
+        # self.four_hour_data.append(self.one_minute_data[0])
+        # self.four_hour_data[0][0] = str(prev_date_time)
+        # self.daily_data.append(self.one_minute_data[0])
+        # self.daily_data[0][0] = str(prev_date_time)
         open_price = self.one_minute_data[0].split(DATA_DELIMITER)[OHLC.OPENINDEX.value]
         high_price = float(self.one_minute_data[0].split(DATA_DELIMITER)[OHLC.HIGHINDEX.value])
         low_price = float(self.one_minute_data[0].split(DATA_DELIMITER)[OHLC.LOWINDEX.value])
-        base_5_min = base_minute
-        open_5_min = open_price
-        high_5_min = high_price
-        low_5_min = low_price
-        base_15_min = base_minute
-        open_15_min = open_price
-        high_15_min = high_price
-        low_15_min = low_price
-        base_hourly = base_minute
-        open_hourly = open_price
-        high_hourly = high_price
-        low_hourly = low_price
-        base_four_hourly = base_minute
-        open_four_hourly = open_price
-        high_four_hourly = high_price
-        low_four_hourly = low_price
-        base_daily = base_minute
-        open_daily = open_price
-        high_daily = high_price
-        low_daily = low_price
-        for index, minute in enumerate(self.one_minute_data):
-            date_time = parser.parse(minute.split(DATA_DELIMITER)[0])
-            high = float(minute.split(DATA_DELIMITER)[OHLC.HIGHINDEX.value])
-            low = float(minute.split(DATA_DELIMITER)[OHLC.LOWINDEX.value])
-            if high >= high_5_min:
-                high_5_min = high
-            if low <= low_5_min:
-                low_5_min = low
+        open_5_min = open_15_min = open_hourly = open_price
+        high_5_min = high_15_min = high_hourly = high_price
+        low_5_min = low_15_min = low_hourly = low_price
+        # open_four_hourly = open_price
+        # high_four_hourly = high_price
+        # low_four_hourly = low_price
+        # open_daily = open_price
+        # high_daily = high_price
+        # low_daily = low_price
+        for index, data in enumerate(self.one_minute_data):
+            date_time = parser.parse(data.split(DATA_DELIMITER)[0])
+            time_delta = date_time - prev_date_time
+            if time_delta.days > 0:
+                pass
+            minute_diff = time_delta.seconds // 60
+            high = float(data.split(DATA_DELIMITER)[OHLC.HIGHINDEX.value])
+            low = float(data.split(DATA_DELIMITER)[OHLC.LOWINDEX.value])
+
             if high >= high_15_min:
                 high_15_min = high
             if low <= low_15_min:
@@ -103,16 +91,16 @@ class TradeState:
                 high_hourly = high
             if low <= low_hourly:
                 low_hourly = low
-            if high >= high_four_hourly:
-                high_four_hourly = high
-            if low <= low_four_hourly:
-                low_four_hourly = low
-            if high >= high_daily:
-                high_daily = high
-            if low <= low_daily:
-                low_daily = low
-            if (date_time.minute - base_5_min) > (FIVE_MINUTES - 1):
-                record = self.one_minute_data[index-1].split(DATA_DELIMITER)
+            # if high >= high_four_hourly:
+            #     high_four_hourly = high
+            # if low <= low_four_hourly:
+            #     low_four_hourly = low
+            # if high >= high_daily:
+            #     high_daily = high
+            # if low <= low_daily:
+            #     low_daily = low
+            if minute_diff >= FIVE_MINUTES:
+                record = self.one_minute_data[index].split(DATA_DELIMITER)
                 record[0] = str(date_time - datetime.timedelta(minutes=date_time.minute%FIVE_MINUTES+FIVE_MINUTES))
                 record[1] = open_5_min
                 record[2] = str(high_5_min)
@@ -123,7 +111,6 @@ class TradeState:
                 high_5_min = float(self.one_minute_data[index].split(DATA_DELIMITER)[OHLC.HIGHINDEX.value])
                 low_5_min = float(self.one_minute_data[index].split(DATA_DELIMITER)[OHLC.LOWINDEX.value])
             if (date_time.minute - base_15_min) > (FIFTEEN_MINUTES - 1):
-                break
                 record = self.one_minute_data[index-1].split(DATA_DELIMITER)
                 record[0] = date_time - datetime.timedelta(minutes=date_time.minute%FIFTEEN_MINUTES+FIFTEEN_MINUTES)
                 record[1] = open_15_min
@@ -146,7 +133,6 @@ class TradeState:
                 high_hourly = float(self.one_minute_data[index].split(DATA_DELIMITER)[OHLC.HIGHINDEX.value])
                 low_hourly = float(self.one_minute_data[index].split(DATA_DELIMITER)[OHLC.LOWINDEX.value])
             if (date_time.minute - base_four_hourly) > (FOUR_HOUR - 1):
-                break
                 record = self.one_minute_data[index-1].split(DATA_DELIMITER)
                 record[0] = date_time - datetime.timedelta(minutes=date_time.minute%FOUR_HOUR+FOUR_HOUR)
                 record[1] = open_four_hourly
@@ -175,31 +161,76 @@ class TradeState:
                 data.write(f"{item}")
 
     def manage(self):
-        next_date_time = parser.parse(self.data[self.data_index+1].split(DATA_DELIMITER)[0])
-        next_tick_date_time = parser.parse(self.tick_data[self.tick_index+1].split(DATA_DELIMITER)[0])
-        next_one_min_date_time = parser.parse(self.one_minute_data[self.one_minute_index+1].split(DATA_DELIMITER)[0])
-        # next_five_min_date_time = parser.parse(self.five_minute_data[self.five_minute_index+1].split(DATA_DELIMITER)[0])
-        # next_fifteen_min_date_time = parser.parse(self.fifteen_minute_data[self.fifteen_minute_index+1].split(DATA_DELIMITER)[0])
-        # next_one_hour_date_time = parser.parse(self.one_hour_data[self.one_hour_index+1].split(DATA_DELIMITER)[0])
-        # next_four_hour_date_time = parser.parse(self.four_hour_data[self.four_hour_index+1].split(DATA_DELIMITER)[0])
-        # next_daily_date_time = parser.parse(self.daily_data[self.daily_index+1].split(DATA_DELIMITER)[0])
-        self.date_time = datetime.datetime.now()-self.date_time_offset
-        if self.date_time >= next_date_time:
-            self.data_index += 1
-        if self.date_time >= next_tick_date_time:
-            self.tick_index += 1
-        if self.date_time >= next_one_min_date_time:
-            self.one_minute_index += 1
-        # if self.date_time >= next_five_min_date_time:
-        #     self.five_minute_index += 1
-        # if self.date_time >= next_fifteen_min_date_time:
-        #     self.fifteen_minute_index += 1
-        # if self.date_time >= next_one_hour_date_time:
-        #     self.one_hour_index += 1
-        # if self.date_time >= next_four_hour_date_time:
-        #     self.four_hour_index += 1
-        # if self.date_time >= next_daily_date_time:
-        #     self.daily_index += 1
+        try:
+            self.data_index = 0
+            next_date_time = parser.parse(self.minute_data[self.minute_index+1].split(DATA_DELIMITER)[0])
+            self.date_time = datetime.datetime.now()-self.date_time_offset #adjusted date_time to program date_time
+            #move to next if time surpasses but if the next is too far in the future, jump to the future
+            #This filters out all the missing data
+            if self.date_time >= next_date_time or self.date_time+datetime.timedelta(minutes=self.time_frame) < next_date_time:
+                self.minute_index += 1
+                self.date_time_offset = datetime.datetime.now() - next_date_time
+
+            curr_record = self.minute_data[self.minute_index].split(DATA_DELIMITER)
+            bar_open_dt = parser.parse(curr_record[0]) - datetime.timedelta(minutes=parser.parse(curr_record[0]).minute % self.time_frame)
+
+            insert_index = 1
+            #set up the draw list
+            if self.time_frame not in self.data:
+                self.data[self.time_frame] = [curr_record]
+                self.data[self.time_frame][0][0] = bar_open_dt
+            elif bar_open_dt > self.data[self.time_frame][0][0]:
+                self.data[self.time_frame].insert(0, curr_record)
+                self.data[self.time_frame][0][0] = bar_open_dt
+            high = curr_record[2]
+            low = curr_record[3]
+            close = curr_record[4]
+
+            candle_count = 0
+            offset = 0
+            while candle_count < MAX_CANDLES:
+                curr_record = self.minute_data[self.minute_index-offset].split(DATA_DELIMITER)
+                curr_dt = parser.parse(curr_record[0])
+                prev_record = self.minute_data[self.minute_index-offset-1].split(DATA_DELIMITER)
+                prev_dt = parser.parse(prev_record[0])
+                dt_diff = (curr_dt - prev_dt).total_seconds() // 60
+                if dt_diff < 1:
+                    raise Exception("DT DIFF IS TOO SMALL")
+                if high < curr_record[2]:
+                    high = curr_record[2]
+                elif low > curr_record[3]:
+                    low = curr_record[3]
+                self.data[self.time_frame][insert_index-1][4] = curr_record[4]
+                #add bar
+                if prev_dt < bar_open_dt:
+                    #set OHL price before moving to next bar
+                    self.data[self.time_frame][insert_index-1][1] = curr_record[1] 
+                    self.data[self.time_frame][insert_index-1][4] = close
+                    if curr_record[1] > high:
+                        high = curr_record[1]
+                    if curr_record[1] < low:
+                        low = curr_record[1]
+                    self.data[self.time_frame][insert_index-1][2] = high
+                    self.data[self.time_frame][insert_index-1][3] = low
+
+                    bar_open_dt = prev_dt - datetime.timedelta(minutes=prev_dt.minute % self.time_frame)
+                    if (insert_index < len(self.data[self.time_frame])
+                        and bar_open_dt <= self.data[self.time_frame][insert_index][0]):
+                            break
+                    self.data[self.time_frame].insert(insert_index, prev_record) #close is implicitly fixed because we're currently at the last minute of bar
+                    self.data[self.time_frame][insert_index][0] = bar_open_dt
+                    insert_index+=1
+                    high = prev_record[2]
+                    low = prev_record[3]
+                    close = prev_record[4]
+                    candle_count+=1
+                offset+=1
+        except:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+            print(sys.exc_info())
+
         
 
 
@@ -210,5 +241,5 @@ if __name__ == "__main__":
     print(state.tick_data[tick_index])
     minute_index = state.find_current_date_time_index(state.date_time, state.one_minute_data)
     print(state.one_minute_data[minute_index])
-    state.generate_time_frames()
+    #state.generate_time_frames()
 

@@ -10,7 +10,7 @@ class TextDisplay():
         y_pos = 20
         y_increment = 25
         data_text = self.settings.font.render(
-            self.state.data[self.state.data_index].replace('\n',''), 1, (FONT_COLOUR))
+            self.state.minute_data[self.state.minute_index].replace('\n',''), 1, (FONT_COLOUR))
         self.screen.blit(data_text, (20, y_pos))
         y_pos+=y_increment
         date_time_text = self.settings.font.render(
