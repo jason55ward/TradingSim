@@ -87,7 +87,7 @@ class Events():
                     move = -15
                 elif rel < 0:
                     move = +15
-                self.state.data_index += move
+                #self.state.data_index += move
             if event.type is QUIT:
                 self.config.write_config(self.state.date_time, self.state.equity, self.state.history)
                 self.state.done = True
