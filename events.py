@@ -24,24 +24,8 @@ class Events():
                     self.settings.chart_pip_height += 20
                 if event.key == pygame.K_UP:
                     self.settings.chart_pip_height -= 20
-                if event.key == pygame.K_LEFT:
-                    self.state.minute_index -= 1
-                    del self.state.data[self.state.time_frame][0]
-                    self.state.date_time_offset += datetime.timedelta(minutes=1)
-                                                    #+ self.state.date_time.minute%self.state.time_frame)
                 if event.key == pygame.K_RIGHT:
-                    self.state.minute_index += 1
-                    self.state.date_time_offset -= datetime.timedelta(minutes=1)
-                                                    #+ self.state.date_time.minute%self.state.time_frame)
-                if event.key == pygame.K_PAGEDOWN:
-                    self.state.minute_index -= self.state.time_frame
-                    del self.state.data[self.state.time_frame][0]
-                    self.state.date_time_offset += datetime.timedelta(minutes=self.state.time_frame
-                                                    + self.state.date_time.minute%self.state.time_frame)
-                if event.key == pygame.K_PAGEUP:
                     self.state.minute_index += self.state.time_frame
-                    self.state.date_time_offset -= datetime.timedelta(minutes=self.state.time_frame)
-                                                    #+ self.state.date_time.minute%self.state.time_frame)
                 if event.key == pygame.K_h:
                     self.settings.show_history = not self.settings.show_history
                 if event.key == pygame.K_b:
@@ -80,6 +64,10 @@ class Events():
                 if event.key == pygame.K_k:
                     price = (self.settings.screen_height - pygame.mouse.get_pos()[1] - CHART_TOP_Y_OFFSET)/self.settings.factor + self.settings.min_height
                     self.state.stop_loss_price = price
+                if event.key == pygame.K_KP_PLUS:
+                    self.settings.candle_width += 1
+                if event.key == pygame.K_KP_MINUS:
+                    self.settings.candle_width -= 1
             if event.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[0]:
                 rel = pygame.mouse.get_rel()[0]
                 move = 0

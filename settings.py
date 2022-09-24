@@ -13,7 +13,7 @@ class Settings():
         self.history_file = os.path.join(SETTINGS_DIR, 'history.txt')
         self.font = pygame.font.SysFont(DEFAULT_FONT, DEFAULT_FONT_SIZE)
         self.price_level_font = pygame.font.SysFont(DEFAULT_FONT, DEFAULT_FONT_SIZE-5)
-        self.candle_width = 5
+        self.candle_width = 4
         self.candle_spacing = 2
         self.chart_pip_height = 150
         self.factor = 0
