@@ -7,7 +7,8 @@ import os, sys
 
 class TradeState:
     """"Keeps track of the current state"""
-    def __init__(self, date_time, equity):
+    def __init__(self, date_time, equity, settings):
+        self.settings = settings
         self.done = False
         self.date_time = parser.parse(date_time)
         self.date_time_offset = datetime.datetime.now() - self.date_time
@@ -29,8 +30,8 @@ class TradeState:
         self.support = []
         self.history = []
 
-        # self.tick_data = load_ticks(self.date_time)
-        # self.tick_index = self.find_current_date_time_index(self.date_time, self.tick_data)
+        self.tick_data = load_ticks(self.date_time)
+        self.tick_index = self.find_current_date_time_index(self.date_time, self.tick_data)
         self.minute_data = load_minutes(self.date_time)
         self.minute_index = self.find_current_date_time_index(self.date_time, self.minute_data)
 
@@ -52,13 +53,36 @@ class TradeState:
 
     def manage(self):
         try:
+            frame_speed = datetime.timedelta(milliseconds=self.settings.time_delta*self.settings.time_speed)
+            self.date_time_offset -= frame_speed
+            self.date_time = datetime.datetime.now() - self.date_time_offset 
+            next_tick_record = self.tick_data[self.tick_index+1].split(DATA_DELIMITER)
+            next_tick_date_time = parser.parse(next_tick_record[0])
+            next_record = self.minute_data[self.minute_index+1].split(DATA_DELIMITER)
+            next_date_time = parser.parse(next_record[0])
+            
+            #next record must always be greater than the current date time
+            while self.date_time >= next_tick_date_time:
+                self.tick_index += 1
+                next_tick_record = self.tick_data[self.tick_index+1].split(DATA_DELIMITER)
+                next_tick_date_time = parser.parse(next_tick_record[0])
+            while self.date_time >= next_date_time:
+                self.minute_index += 1
+                next_record = self.minute_data[self.minute_index+1].split(DATA_DELIMITER)
+                next_date_time = parser.parse(next_record[0])
+
+            curr_tick_record = self.tick_data[self.tick_index].split(DATA_DELIMITER)
             curr_record = self.minute_data[self.minute_index].split(DATA_DELIMITER)
+            if self.date_time+datetime.timedelta(minutes=1) < next_tick_date_time:
+                self.date_time_offset -= next_tick_date_time - self.date_time
+                self.date_time = datetime.datetime.now() - self.date_time_offset
             bar_open_dt = parser.parse(curr_record[OHLC.DATETIMEINDEX.value]) - datetime.timedelta(minutes=parser.parse(curr_record[0]).minute % self.time_frame)
-            while bar_open_dt+datetime.timedelta(minutes=self.time_frame-1) > parser.parse(curr_record[OHLC.DATETIMEINDEX.value]):
-                self.minute_index+=1
-                curr_record = self.minute_data[self.minute_index].split(DATA_DELIMITER)
+            # #loop to the end of the timeframe
+            # while bar_open_dt+datetime.timedelta(minutes=self.time_frame-1) > parser.parse(curr_record[OHLC.DATETIMEINDEX.value]):
+            #     self.minute_index+=1
+            #     curr_record = self.minute_data[self.minute_index].split(DATA_DELIMITER)
             insert_index = 1
-            #set up the draw list
+            #set up the draw list, create list if doesn't exist. Insert infront if exists and greater.
             if self.time_frame not in self.data:
                 self.data[self.time_frame] = [curr_record]
                 self.data[self.time_frame][0][OHLC.DATETIMEINDEX.value] = bar_open_dt
@@ -75,6 +99,7 @@ class TradeState:
 
             candle_count = 0
             offset = 0
+            #work backwards from current minute to build the candle list up to the candle limit
             while candle_count < MAX_CANDLES:
                 curr_record = self.minute_data[self.minute_index-offset].split(DATA_DELIMITER)
                 curr_dt = parser.parse(curr_record[OHLC.DATETIMEINDEX.value])
@@ -87,7 +112,7 @@ class TradeState:
                     high = float(curr_record[OHLC.HIGHINDEX.value])
                 elif low > float(curr_record[OHLC.LOWINDEX.value]):
                     low = float(curr_record[OHLC.LOWINDEX.value])
-                #add bar
+                #add bar if we've moved to before the time of the current bar
                 if prev_dt < bar_open_dt:
                     #set OHLC price before moving to next bar
                     open_value = float(curr_record[OHLC.OPENINDEX.value])

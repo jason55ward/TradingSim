@@ -68,6 +68,10 @@ class Events():
                     self.settings.candle_width += 1
                 if event.key == pygame.K_KP_MINUS:
                     self.settings.candle_width -= 1
+                if event.key == pygame.K_EQUALS:
+                    self.settings.time_speed += 5
+                if event.key == pygame.K_MINUS:
+                    self.settings.time_speed -= 5
             if event.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[0]:
                 rel = pygame.mouse.get_rel()[0]
                 move = 0

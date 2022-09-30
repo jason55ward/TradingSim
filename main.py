@@ -34,7 +34,7 @@ class Trading():
         
         self.config = Config(self.settings.config_file, self.settings.history_file)
         date_time, equity = self.config.read_config()
-        self.state = TradeState(date_time=date_time, equity=equity)
+        self.state = TradeState(date_time=date_time, equity=equity, settings=self.settings)
         
         self.screen = pygame.display.set_mode(size=SCREEN_SIZE, flags=pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE, depth=32, display=0)
         pygame.display.set_caption(APP_NAME)
@@ -52,7 +52,9 @@ class Trading():
         The loop that runs the app
         """
         try:
+            clock = pygame.time.Clock()
             while not self.state.done:
+                self.settings.time_delta = clock.tick(60)
                 self.events.process_events()
                 self.screen.fill(SCREEN_RGB)
                 self.state.manage()
