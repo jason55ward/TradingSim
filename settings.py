@@ -23,5 +23,5 @@ class Settings():
         self.default_position_size = 1
         self.max_height = 0
         self.min_height = 9999999
-        self.time_speed = 15
+        self.time_speed = 0
         self.time_delta = 0

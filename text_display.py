@@ -7,15 +7,14 @@ class TextDisplay():
         self.settings = settings
 
     def draw_info_text(self):
+        date_time_text = self.settings.font.render(
+            self.state.date_time.strftime("%d-%m-%Y %H:%M"), 1, (FONT_COLOUR))
+        self.screen.blit(date_time_text, (1600, 20))
         y_pos = 20
         y_increment = 25
         data_text = self.settings.font.render(
             self.state.minute_data[self.state.minute_index].replace('\n',''), 1, (FONT_COLOUR))
         self.screen.blit(data_text, (20, y_pos))
-        y_pos+=y_increment
-        date_time_text = self.settings.font.render(
-            str(self.state.date_time), 1, (FONT_COLOUR))
-        self.screen.blit(date_time_text, (20, y_pos))
         y_pos+=y_increment
         equity_text = self.settings.font.render(f"Pre-Trade Balance: {'%.2f' % self.state.equity}", 1, (FONT_COLOUR))
         self.screen.blit(equity_text, (20, y_pos))

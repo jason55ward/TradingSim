@@ -25,7 +25,7 @@ class Events():
                 if event.key == pygame.K_UP:
                     self.settings.chart_pip_height -= 20
                 if event.key == pygame.K_RIGHT:
-                    self.state.minute_index += self.state.time_frame
+                    self.state.next_bar()
                 if event.key == pygame.K_h:
                     self.settings.show_history = not self.settings.show_history
                 if event.key == pygame.K_b:
