@@ -30,8 +30,8 @@ class TradeState:
         self.support = []
         self.history = []
 
-        self.tick_data = load_ticks(self.date_time)
-        self.tick_index = self.find_current_date_time_index(self.date_time, self.tick_data)
+        #self.tick_data = load_ticks(self.date_time)
+        #self.tick_index = self.find_current_date_time_index(self.date_time, self.tick_data)
         self.minute_data = load_minutes(self.date_time)
         self.minute_index = self.find_current_date_time_index(self.date_time, self.minute_data)
         self.last_minute_index = self.minute_index
@@ -54,6 +54,13 @@ class TradeState:
             if date_time <= line_date_time:
                 return i-1
 
+    def prior_day(self):
+        self.data = {}
+        self.minute_index-=60*30
+        self.date_time -= datetime.timedelta(days=1) - datetime.timedelta(minutes=self.date_time.minute)
+        self.date_time_offset += datetime.timedelta(days=1) - datetime.timedelta(minutes=self.date_time.minute)
+        self.manage()
+
     def next_bar(self):
         self.date_time += datetime.timedelta(minutes=self.time_frame)
         self.date_time_offset -= datetime.timedelta(minutes=self.time_frame)
@@ -73,15 +80,17 @@ class TradeState:
         """
         Happens after date_time is moved far forwards, move to the data matching the date_time
         """
-        next_tick_record = self.tick_data[self.tick_index+1].split(DATA_DELIMITER)
-        next_tick_date_time = parser.parse(next_tick_record[0])
+        # next_tick_record = self.tick_data[self.tick_index+1].split(DATA_DELIMITER)
+        # next_tick_date_time = parser.parse(next_tick_record[0])
+        curr_record = self.minute_data[self.minute_index].split(DATA_DELIMITER)
+        curr_date_time = parser.parse(curr_record[0])
         next_record = self.minute_data[self.minute_index+self.time_frame].split(DATA_DELIMITER)
         next_date_time = parser.parse(next_record[0])
         #next record must always be greater than the current date time
-        while self.date_time >= next_tick_date_time:
-            self.tick_index += 1
-            next_tick_record = self.tick_data[self.tick_index+1].split(DATA_DELIMITER)
-            next_tick_date_time = parser.parse(next_tick_record[0])
+        # while self.date_time >= next_tick_date_time:
+        #     self.tick_index += 1
+        #     next_tick_record = self.tick_data[self.tick_index+1].split(DATA_DELIMITER)
+        #     next_tick_date_time = parser.parse(next_tick_record[0])
         while self.date_time >= next_date_time:
             self.minute_index += 1
             next_record = self.minute_data[self.minute_index+self.time_frame].split(DATA_DELIMITER)
@@ -104,7 +113,7 @@ class TradeState:
         try:
             self.match_data_to_date_time()
             self.set_minute_to_bar_close()
-            curr_tick_record = self.tick_data[self.tick_index].split(DATA_DELIMITER)
+            # curr_tick_record = self.tick_data[self.tick_index].split(DATA_DELIMITER)
             curr_record = self.minute_data[self.minute_index].split(DATA_DELIMITER)
             curr_date_time = parser.parse(curr_record[OHLC.DATETIMEINDEX.value])
             bar_open_dt = curr_date_time - datetime.timedelta(minutes=curr_date_time.minute % self.time_frame)
@@ -188,8 +197,8 @@ class TradeState:
 if __name__ == "__main__":
     date_time = '2009-01-01 190000'
     state = TradeState(date_time, 50)
-    tick_index  = state.find_current_date_time_index(state.date_time, state.tick_data)
-    print(state.tick_data[tick_index])
+    # tick_index  = state.find_current_date_time_index(state.date_time, state.tick_data)
+    # print(state.tick_data[tick_index])
     minute_index = state.find_current_date_time_index(state.date_time, state.one_minute_data)
     print(state.one_minute_data[minute_index])
     #state.generate_time_frames()

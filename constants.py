@@ -1,5 +1,5 @@
 APP_NAME = "Trading Simulator"
-DATA_DIR = 'D:\TradingSim\Trading Data'
+DATA_DIR = './Trading Data'
 SETTINGS_DIR = 'settings'
 CURRENCY_PAIR = 'GBPUSD'
 TICK_DIR_NAME = 'Tick'

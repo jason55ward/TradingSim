@@ -34,11 +34,16 @@ def load_minutes(date_time):
     minute_zip_file_path = os.path.join(minute_dir, minute_zip_filename)
     if not os.path.exists(minute_zip_file_path):
         raise FileNotFoundError((f"Cant't find file {minute_zip_file_path}"))
+    next_year_minute_zip_filename = f"{CURRENCY_PAIR}_M1{date_time.year+1}.zip"
+    next_year_minute_zip_file_path = os.path.join(minute_dir, next_year_minute_zip_filename)
+    if not os.path.exists(next_year_minute_zip_file_path):
+        raise FileNotFoundError((f"Cant't find file {next_year_minute_zip_file_path}"))
     prior_year_minute_zip_filename = f"{CURRENCY_PAIR}_M1{date_time.year-1}.zip"
     prior_year_minute_zip_file_path = os.path.join(minute_dir, prior_year_minute_zip_filename)
     if date_time.year != OLDEST_DATA_YEAR and not os.path.exists(prior_year_minute_zip_file_path):
         raise FileNotFoundError((f"Cant't find file {prior_year_minute_zip_file_path}"))
 
+    next_minute_file = f"DAT_NT_{CURRENCY_PAIR}_M1_{date_time.year+1}.csv"
     prior_minute_file = f"DAT_NT_{CURRENCY_PAIR}_M1_{date_time.year-1}.csv"
     minute_file = f"DAT_NT_{CURRENCY_PAIR}_M1_{date_time.year}.csv"
     
@@ -53,5 +58,10 @@ def load_minutes(date_time):
         with thezip.open(minute_file, mode='r') as thefile:
             for line in thefile:
                 minutes.append(line.decode("utf-8"))
+
+    with zipfile.ZipFile(next_year_minute_zip_file_path) as thezip:
+            with thezip.open(next_minute_file, mode='r') as thefile:
+                for line in thefile:
+                    minutes.append(line.decode("utf-8"))
 
     return minutes

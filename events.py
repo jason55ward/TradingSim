@@ -24,8 +24,12 @@ class Events():
                     self.settings.chart_pip_height += 20
                 if event.key == pygame.K_UP:
                     self.settings.chart_pip_height -= 20
+                if event.key == pygame.K_LEFT:
+                    self.state.prior_day()
                 if event.key == pygame.K_RIGHT:
                     self.state.next_bar()
+                if event.key == pygame.K_l:
+                    self.state.date_time += datetime.timedelta(days=1)
                 if event.key == pygame.K_h:
                     self.settings.show_history = not self.settings.show_history
                 if event.key == pygame.K_b:

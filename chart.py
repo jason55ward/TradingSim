@@ -1,8 +1,10 @@
+from datetime import date
 from constants import *
 from enums import TradeMode, OHLC
 import pygame
 from helpers import draw_horizontal_dashed_line
 import sys, os
+from dateutil import parser
 
 class Chart():
     def __init__(self, screen, state, settings):
@@ -33,7 +35,7 @@ class Chart():
 
     def draw_price_lines(self):
         try:
-            for x in range(0, self.settings.chart_pip_height+100, 10):
+            for x in range(0, self.settings.chart_pip_height+110, 25):
                 val = float("%.3f" % self.settings.max_height) - (x-50)*0.0001
                 line_ypos = int(self.settings.screen_height - (val-self.settings.min_height)
                                 * self.settings.factor) - CHART_TOP_Y_OFFSET
@@ -60,6 +62,10 @@ class Chart():
                 offset = x#self.state.data_index-x
                 xpos = self.settings.candle_spacing + \
                     (self.settings.candle_spacing + self.settings.candle_width) * (MAX_CANDLES-x)
+                date_time = self.state.data[self.state.time_frame][offset][OHLC.DATETIMEINDEX.value]
+                if date_time.hour == 0 and date_time.minute == 0:
+                    pygame.draw.line(self.screen, BULL_CANDLE_COLOUR, (xpos, 0),
+                                (xpos, SCREEN_SIZE[1]), 1)
                 open_price = float(self.state.data[self.state.time_frame][offset][OHLC.OPENINDEX.value])
                 high_price = float(self.state.data[self.state.time_frame][offset][OHLC.HIGHINDEX.value])
                 low_price = float(self.state.data[self.state.time_frame][offset][OHLC.LOWINDEX.value])
