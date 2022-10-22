@@ -36,13 +36,13 @@ class Chart():
     def draw_price_lines(self):
         try:
             for x in range(0, self.settings.chart_pip_height+110, 25):
-                val = float("%.3f" % self.settings.max_height) - (x-50)*0.0001
+                val = float('%.3f' % self.settings.max_height) - (x-55)*0.0001
                 line_ypos = int(self.settings.screen_height - (val-self.settings.min_height)
                                 * self.settings.factor) - CHART_TOP_Y_OFFSET
                 pygame.draw.line(self.screen, DOJI_CANDLE_COLOUR, (0, line_ypos),
                                 (self.settings.screen_width - CHART_RIGHT_SPACING - 5, line_ypos), 1)
                 text = self.settings.price_level_font.render(
-                    str(val).ljust(7, '0'), 1, (BEAR_CANDLE_COLOUR))
+                    f'{val:.5f}'.ljust(7, '0'), 1, (BEAR_CANDLE_COLOUR))
                 self.screen.blit(text, (self.settings.screen_width -
                                 CHART_RIGHT_SPACING, line_ypos - 13))
             for val in self.state.support:
