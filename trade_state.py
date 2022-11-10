@@ -10,6 +10,7 @@ class TradeState:
     def __init__(self, date_time, equity, settings):
         self.settings = settings
         self.done = False
+        self.paused = False
         self.date_time = parser.parse(date_time) #the datetime in the past
         self.date_time_offset = datetime.datetime.now() - self.date_time
         self.equity = equity
@@ -30,8 +31,8 @@ class TradeState:
         self.support = []
         self.history = []
 
-        #self.tick_data = load_ticks(self.date_time)
-        #self.tick_index = self.find_current_date_time_index(self.date_time, self.tick_data)
+        # self.tick_data = load_ticks(self.date_time)
+        # self.tick_index = self.find_current_date_time_index(self.date_time, self.tick_data)
         self.minute_data = load_minutes(self.date_time)
         self.minute_index = self.find_current_date_time_index(self.date_time, self.minute_data)
         self.last_minute_index = self.minute_index
@@ -62,19 +63,25 @@ class TradeState:
         self.manage()
 
     def next_bar(self):
+        # zero_offset = datetime.timedelta(seconds=self.date_time.second)
+        # self.date_time += datetime.timedelta(minutes=self.time_frame) - zero_offset
+        # self.date_time_offset -= datetime.timedelta(minutes=self.time_frame) + zero_offset
         self.date_time += datetime.timedelta(minutes=self.time_frame)
         self.date_time_offset -= datetime.timedelta(minutes=self.time_frame)
 
     def move_time_forward(self):
-        frame_speed = datetime.timedelta(milliseconds=self.settings.time_delta*self.settings.time_speed)
+        frame_speed = datetime.timedelta(milliseconds=self.settings.time_delta/FRAME_RATE*100*self.settings.time_speed)
         self.date_time_offset -= frame_speed
+        self.date_time += frame_speed
 
     def skip_flats(self):
-        next_tick_record = self.tick_data[self.tick_index+1].split(DATA_DELIMITER)
-        next_tick_date_time = parser.parse(next_tick_record[0])
-        if self.date_time+datetime.timedelta(minutes=1) < next_tick_date_time:
-            self.date_time_offset -= next_tick_date_time - self.date_time
-            self.date_time = datetime.datetime.now() - self.date_time_offset
+        next_record = self.minute_data[self.minute_index+self.time_frame].split(DATA_DELIMITER)
+        next_date_time = parser.parse(next_record[0])
+        if self.date_time < next_date_time - datetime.timedelta(minutes=60):
+            timedelta = datetime.timedelta(minutes=1)
+            self.date_time -= datetime.timedelta(seconds=self.date_time.second)
+            while self.date_time < next_date_time:
+                self.date_time += timedelta
 
     def match_data_to_date_time(self):
         """
@@ -86,11 +93,8 @@ class TradeState:
         curr_date_time = parser.parse(curr_record[0])
         next_record = self.minute_data[self.minute_index+self.time_frame].split(DATA_DELIMITER)
         next_date_time = parser.parse(next_record[0])
+
         #next record must always be greater than the current date time
-        # while self.date_time >= next_tick_date_time:
-        #     self.tick_index += 1
-        #     next_tick_record = self.tick_data[self.tick_index+1].split(DATA_DELIMITER)
-        #     next_tick_date_time = parser.parse(next_tick_record[0])
         while self.date_time >= next_date_time:
             self.minute_index += 1
             next_record = self.minute_data[self.minute_index+self.time_frame].split(DATA_DELIMITER)
@@ -111,8 +115,11 @@ class TradeState:
 
     def manage(self):
         try:
+            if not self.paused:
+                self.move_time_forward()
+            self.skip_flats()
             self.match_data_to_date_time()
-            self.set_minute_to_bar_close()
+            # self.set_minute_to_bar_close()
             # curr_tick_record = self.tick_data[self.tick_index].split(DATA_DELIMITER)
             curr_record = self.minute_data[self.minute_index].split(DATA_DELIMITER)
             curr_date_time = parser.parse(curr_record[OHLC.DATETIMEINDEX.value])

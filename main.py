@@ -54,7 +54,7 @@ class Trading():
         try:
             clock = pygame.time.Clock()
             while not self.state.done:
-                self.settings.time_delta = clock.tick(60)
+                self.settings.time_delta = clock.tick(FRAME_RATE)
                 self.events.process_events()
                 self.screen.fill(SCREEN_RGB)
                 self.state.manage()
