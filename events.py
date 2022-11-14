@@ -76,6 +76,8 @@ class Events():
                     self.settings.time_speed += 10
                 if event.key == pygame.K_MINUS:
                     self.settings.time_speed -= 10
+                    if self.settings.time_speed < 1:
+                        self.settings.time_speed = 1
                 if event.key == pygame.K_PAUSE:
                     self.state.paused = not self.state.paused
             if event.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[0]:
