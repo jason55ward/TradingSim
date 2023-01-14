@@ -9,8 +9,8 @@ class Settings():
             os.mkdir(DATA_DIR)
         if not os.path.exists(SETTINGS_DIR):
             os.mkdir(SETTINGS_DIR)
-        self.config_file = os.path.join(SETTINGS_DIR, 'config.txt')
-        self.history_file = os.path.join(SETTINGS_DIR, 'history.txt')
+        self.config_file = os.path.join(SETTINGS_DIR, CONFIG_FILE_NAME)
+        self.history_file = os.path.join(SETTINGS_DIR, HISTORY_FILE_NAME)
         self.font = pygame.font.SysFont(DEFAULT_FONT, DEFAULT_FONT_SIZE)
         self.price_level_font = pygame.font.SysFont(DEFAULT_FONT, DEFAULT_FONT_SIZE-5)
         self.candle_width = 4

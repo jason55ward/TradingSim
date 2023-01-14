@@ -31,9 +31,11 @@ class TradeState:
         self.support = []
         self.history = []
 
-        # self.tick_data = load_ticks(self.date_time)
-        # self.tick_index = self.find_current_date_time_index(self.date_time, self.tick_data)
-        self.minute_data = load_minutes(self.date_time)
+        self.tick_data = load_ticks(self.date_time)
+        self.tick_index = self.find_current_date_time_index(self.date_time, self.tick_data)
+        self.minute_data = load_minutes(self.date_time-datetime.timedelta(year=1))
+        self.minute_data.append(load_minutes(self.date_time))
+        self.minute_data.append( load_minutes(self.date_time+datetime.timedelta(year=1)))
         self.minute_index = self.find_current_date_time_index(self.date_time, self.minute_data)
         self.last_minute_index = self.minute_index
         self.date_time = self.date_time - datetime.timedelta(minutes=self.date_time.minute % self.time_frame) \
@@ -119,7 +121,7 @@ class TradeState:
                 self.move_time_forward()
             self.skip_flats()
             self.match_data_to_date_time()
-            # self.set_minute_to_bar_close()
+            self.set_minute_to_bar_close()
             # curr_tick_record = self.tick_data[self.tick_index].split(DATA_DELIMITER)
             curr_record = self.minute_data[self.minute_index].split(DATA_DELIMITER)
             curr_date_time = parser.parse(curr_record[OHLC.DATETIMEINDEX.value])
