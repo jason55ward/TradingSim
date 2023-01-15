@@ -1,5 +1,6 @@
 from constants import *
-
+import datetime
+datetime.datetime.now().weekday
 class TextDisplay():
     def __init__(self, screen, state, settings):
         self.screen = screen
@@ -8,7 +9,7 @@ class TextDisplay():
 
     def draw_info_text(self):
         date_time_text = self.settings.font.render(
-            self.state.date_time.strftime("%d-%m-%Y %H:%M"), 1, (FONT_COLOUR))
+            self.state.date_time.strftime("%d-%m-%Y %H:%M   %A"), 1, (FONT_COLOUR))
         self.screen.blit(date_time_text, (1600, 20))
         y_pos = 20
         y_increment = 25

@@ -1,4 +1,4 @@
-import logging
+import logging, os, sys
 from dateutil import parser
 from constants import *
 from enums import TradeMode, OHLC
@@ -51,19 +51,25 @@ class Orders():
             self.state.average_price = 0
 
     def check_orders(self):
-        current_close_price = float(self.state.minute_data[self.state.minute_index].split(DATA_DELIMITER)[OHLC.CLOSEINDEX.value])
-        current_high_price = float(self.state.minute_data[self.state.minute_index].split(DATA_DELIMITER)[OHLC.HIGHINDEX.value])
-        current_low_price = float(self.state.minute_data[self.state.minute_index].split(DATA_DELIMITER)[OHLC.LOWINDEX.value])
-        if (self.state.trade_mode == TradeMode.BUY):
-            self.state.pips = (current_close_price - self.state.average_price) * 10000-1
-            self.state.profit = self.state.pips * abs(self.state.position_size)
-            if current_low_price <= self.state.stop_loss_price:
-                logging.debug('close buy check')
-                self.close(self.state.stop_loss_price)
+        try:
+            current_close_price = float(self.state.minute_data[self.state.minute_index].split(DATA_DELIMITER)[OHLC.CLOSEINDEX.value])
+            current_high_price = float(self.state.minute_data[self.state.minute_index].split(DATA_DELIMITER)[OHLC.HIGHINDEX.value])
+            current_low_price = float(self.state.minute_data[self.state.minute_index].split(DATA_DELIMITER)[OHLC.LOWINDEX.value])
+            if (self.state.trade_mode == TradeMode.BUY):
+                self.state.pips = (current_close_price - self.state.average_price) * 10000-1
+                self.state.profit = self.state.pips * abs(self.state.position_size)
+                if current_low_price <= self.state.stop_loss_price:
+                    logging.debug('close buy check')
+                    self.close(self.state.stop_loss_price)
 
-        if (self.state.trade_mode == TradeMode.SELL):
-            self.state.pips = (self.state.average_price - current_close_price) * 10000-1
-            self.state.profit = self.state.pips * abs(self.state.position_size)
-            if current_high_price >= self.state.stop_loss_price:
-                logging.debug('close sell check')
-                self.close(self.state.stop_loss_price)
+            if (self.state.trade_mode == TradeMode.SELL):
+                self.state.pips = (self.state.average_price - current_close_price) * 10000-1
+                self.state.profit = self.state.pips * abs(self.state.position_size)
+                if current_high_price >= self.state.stop_loss_price:
+                    logging.debug('close sell check')
+                    self.close(self.state.stop_loss_price)
+        except:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+            print(sys.exc_info())

@@ -12,6 +12,23 @@ class Chart():
         self.state = state
         self.settings = settings
 
+    def draw_chart(self):
+        """
+        Draws the chart
+        """
+        try:
+            self.calc_high_low_price()
+            self.draw_price_lines()
+            self.draw_chart_data()
+            self.draw_orders()
+            if self.settings.show_history:
+                self.draw_history()
+        except:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+            print(sys.exc_info())
+
     def calc_high_low_price(self):
         try:
             self.settings.max_height = 0

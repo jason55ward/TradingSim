@@ -12,7 +12,6 @@ class Events():
         self.state = state
         self.orders = Orders(state=state, settings=settings,)
 
-
     def process_events(self):
         events = pygame.event.get(pump=True)
         for event in events:
@@ -20,14 +19,17 @@ class Events():
                 if event.key == pygame.K_ESCAPE:
                     self.config.write_config(self.state.date_time, self.state.equity)
                     self.state.done = True
-                if event.key == pygame.K_DOWN:
+                if event.key == pygame.K_PAGEUP:
                     self.settings.chart_pip_height += 20
-                if event.key == pygame.K_UP:
+                if event.key == pygame.K_PAGEDOWN:
                     self.settings.chart_pip_height -= 20
-                if event.key == pygame.K_LEFT:
-                    self.state.prior_day()
-                if event.key == pygame.K_RIGHT:
+                # if event.key == pygame.K_DOWN:
+                #     self.state.prior_day()
+                if event.key == pygame.K_UP:
                     self.state.next_bar()
+                if event.key == pygame.K_RIGHT:
+                    self.state.date_time -= datetime.timedelta(seconds=self.state.date_time.second)
+                    self.state.date_time+=datetime.timedelta(minutes=1)
                 if event.key == pygame.K_l:
                     self.state.date_time += datetime.timedelta(days=1)
                 if event.key == pygame.K_h:
@@ -68,13 +70,13 @@ class Events():
                 if event.key == pygame.K_k:
                     price = (self.settings.screen_height - pygame.mouse.get_pos()[1] - CHART_TOP_Y_OFFSET)/self.settings.factor + self.settings.min_height
                     self.state.stop_loss_price = price
-                if event.key == pygame.K_KP_PLUS:
-                    self.settings.candle_width += 1
-                if event.key == pygame.K_KP_MINUS:
-                    self.settings.candle_width -= 1
                 if event.key == pygame.K_EQUALS:
-                    self.settings.time_speed += 10
+                    self.settings.candle_width += 1
                 if event.key == pygame.K_MINUS:
+                    self.settings.candle_width -= 1
+                if event.key == pygame.K_KP_PLUS:
+                    self.settings.time_speed += 10
+                if event.key == pygame.K_KP_MINUS:
                     self.settings.time_speed -= 10
                     if self.settings.time_speed < 1:
                         self.settings.time_speed = 1

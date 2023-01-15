@@ -36,7 +36,7 @@ class Trading():
         date_time, equity = self.config.read_config()
         self.state = TradeState(date_time=date_time, equity=equity, settings=self.settings)
         
-        self.screen = pygame.display.set_mode(size=SCREEN_SIZE, flags=pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE, depth=32, display=0)
+        self.screen = pygame.display.set_mode(size=SCREEN_SIZE, flags=pygame.RESIZABLE, depth=32, display=0)
         pygame.display.set_caption(APP_NAME)
         self.settings.screen_width, self.settings.screen_height = pygame.display.get_surface().get_size()
         
@@ -62,7 +62,7 @@ class Trading():
                 self.text_display.draw_info_text()
                 if self.settings.showing_help:
                     self.text_display.displayHelp()
-                self.draw_chart()
+                self.chart.draw_chart()
                 pygame.display.flip()
                 self.settings.first_run = False
         except:
@@ -71,23 +71,7 @@ class Trading():
             print(exc_type, fname, exc_tb.tb_lineno)
             print(sys.exc_info())
 
-    def draw_chart(self):
-        """
-        Draws the chart
-        """
-        try:
-            self.chart.calc_high_low_price()
-            self.chart.draw_price_lines()
-            self.chart.draw_chart_data()
-            self.chart.draw_orders()
-            if self.settings.show_history:
-                self.chart.draw_history()
-        except:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(exc_type, fname, exc_tb.tb_lineno)
-            print(sys.exc_info())
-
+    
 
 if __name__ == "__main__":
     app = Trading()
