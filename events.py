@@ -19,17 +19,22 @@ class Events():
                 if event.key == pygame.K_ESCAPE:
                     self.config.write_config(self.state.date_time, self.state.equity)
                     self.state.done = True
-                if event.key == pygame.K_PAGEUP:
-                    self.settings.chart_pip_height += 20
                 if event.key == pygame.K_PAGEDOWN:
+                    self.settings.chart_pip_height += 20
+                if event.key == pygame.K_PAGEUP:
                     self.settings.chart_pip_height -= 20
                 # if event.key == pygame.K_DOWN:
                 #     self.state.prior_day()
-                if event.key == pygame.K_UP:
-                    self.state.next_bar()
                 if event.key == pygame.K_RIGHT:
-                    self.state.date_time -= datetime.timedelta(seconds=self.state.date_time.second)
+                    self.state.next_bar()
+                if event.key == pygame.K_KP_1:
+                    self.state.date_time -= datetime.timedelta(seconds=self.state.date_time.second) \
+                                        +datetime.timedelta(microseconds=self.state.date_time.microsecond)
                     self.state.date_time+=datetime.timedelta(minutes=1)
+                if event.key == pygame.K_KP_5:
+                    self.state.date_time -= datetime.timedelta(seconds=self.state.date_time.second) \
+                                        +datetime.timedelta(microseconds=self.state.date_time.microsecond)
+                    self.state.date_time+=datetime.timedelta(minutes=5)
                 if event.key == pygame.K_l:
                     self.state.date_time += datetime.timedelta(days=1)
                 if event.key == pygame.K_h:
@@ -52,12 +57,14 @@ class Events():
                     self.state.time_frame = FIFTEEN_MINUTES
                     #self.state.data = self.settings.fifteen_minute_data
                 if event.key == pygame.K_4:
+                    self.state.time_frame = THIRTY_MINUTES
+                if event.key == pygame.K_5:
                     self.state.time_frame = ONE_HOUR
                     #self.state.data = self.settings.one_hour_data
-                if event.key == pygame.K_5:
+                if event.key == pygame.K_6:
                     self.state.time_frame = FOUR_HOUR
                     #self.state.data = self.settings.four_hour_data
-                if event.key == pygame.K_6:
+                if event.key == pygame.K_7:
                     self.state.time_frame = ONE_DAY
                     #self.state.data = self.state.daily_data
                 if event.key == pygame.K_p:

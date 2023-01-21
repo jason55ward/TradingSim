@@ -32,9 +32,10 @@ class TradeState:
         self.tick_data = load_ticks(self.date_time)
         self.tick_index = 0
         self.minute_index = 0
-        self.minute_data = load_minutes(self.date_time-datetime.timedelta(days=365))
-        self.minute_data.extend(load_minutes(self.date_time))
-        #self.minute_data.extend(load_minutes(self.date_time+datetime.timedelta(days=365)))
+        timedelta = datetime.timedelta(days=365)
+        self.minute_data = []
+        for year in range(-3,3):
+            self.minute_data.extend(load_minutes(self.date_time+year*timedelta))
         self.date_time = self.date_time - datetime.timedelta(minutes=self.date_time.minute % self.time_frame) \
                         - datetime.timedelta(seconds=self.date_time.second)
 
@@ -46,7 +47,8 @@ class TradeState:
         #minutes
         curr_record = self.minute_data[self.minute_index].split(DATA_DELIMITER)
         curr_date_time = parser.parse(curr_record[0])
-
+        seconds_offset = datetime.timedelta(seconds=self.date_time.second) \
+                        + datetime.timedelta(microseconds=self.date_time.microsecond) 
         #make the big jumps
         if self.date_time > curr_date_time:
             diff = self.date_time - curr_date_time
@@ -70,7 +72,7 @@ class TradeState:
             self.minute_index -= 1
             curr_record = self.minute_data[self.minute_index].split(DATA_DELIMITER)
             curr_date_time = parser.parse(curr_record[0])
-        if self.date_time > curr_date_time:
+        if self.date_time-seconds_offset > curr_date_time:
             self.minute_index += 1
             curr_record = self.minute_data[self.minute_index].split(DATA_DELIMITER)
             curr_date_time = parser.parse(curr_record[0])
@@ -90,9 +92,11 @@ class TradeState:
         self.date_time -= datetime.timedelta(minutes=self.date_time.second)
 
     def next_bar(self):
-        seconds_offset = datetime.timedelta(seconds=self.date_time.second)
+        seconds_offset = datetime.timedelta(seconds=self.date_time.second) - datetime.timedelta(microseconds=self.date_time.microsecond)
         next_bar_minute_timedelta = self.time_frame-self.date_time.minute%self.time_frame
-        if next_bar_minute_timedelta != 1:
+        if next_bar_minute_timedelta == 1:
+            next_bar_minute_timedelta = self.time_frame
+        elif next_bar_minute_timedelta != 1:
             next_bar_minute_timedelta-=1
         self.date_time += datetime.timedelta(minutes=next_bar_minute_timedelta) - seconds_offset
 
@@ -105,9 +109,6 @@ class TradeState:
             if not self.paused:
                 self.move_time_forward()
             self.find_current_date_time_index()
-            #self.skip_flats()
-            #self.match_data_to_date_time()
-            #self.set_minute_to_bar_close()
             # curr_tick_record = self.tick_data[self.tick_index].split(DATA_DELIMITER)
             curr_record = self.minute_data[self.minute_index].split(DATA_DELIMITER)
             curr_date_time = parser.parse(curr_record[OHLC.DATETIMEINDEX.value])
@@ -166,12 +167,14 @@ class TradeState:
                     #prevent inserting data that already exists. The first bar and the bar before it will be overwritten.
                     #Caters for NextBar() to cause the entire data set to enter the bucket
                     bar_open_dt = prev_dt - datetime.timedelta(minutes=prev_dt.minute % self.time_frame)
-                    if (insert_index < len(self.data[self.time_frame])
-                        and bar_open_dt <= self.data[self.time_frame][insert_index][OHLC.DATETIMEINDEX.value]):
-                            break
+                    if insert_index < len(self.data[self.time_frame]):
+                        if (insert_index == 3 and
+                            bar_open_dt <= self.data[self.time_frame][insert_index][OHLC.DATETIMEINDEX.value]):
+                                break
+                    else:
+                        self.data[self.time_frame].insert(insert_index, prev_record)
 
                     #setup new bar with close value, when bar complete we'll update it on next iteration with the OHLC as above
-                    self.data[self.time_frame].insert(insert_index, prev_record)
                     self.data[self.time_frame][insert_index][OHLC.DATETIMEINDEX.value] = bar_open_dt
                     high = float(prev_record[OHLC.HIGHINDEX.value])
                     low = float(prev_record[OHLC.LOWINDEX.value])
