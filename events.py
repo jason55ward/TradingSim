@@ -31,6 +31,14 @@ class Events():
                     self.state.date_time -= datetime.timedelta(seconds=self.state.date_time.second) \
                                         +datetime.timedelta(microseconds=self.state.date_time.microsecond)
                     self.state.date_time+=datetime.timedelta(minutes=1)
+                if event.key == pygame.K_KP_2:
+                    self.state.date_time -= datetime.timedelta(seconds=self.state.date_time.second) \
+                                        +datetime.timedelta(microseconds=self.state.date_time.microsecond)
+                    self.state.date_time+=datetime.timedelta(minutes=2)
+                if event.key == pygame.K_KP_3:
+                    self.state.date_time -= datetime.timedelta(seconds=self.state.date_time.second) \
+                                        +datetime.timedelta(microseconds=self.state.date_time.microsecond)
+                    self.state.date_time+=datetime.timedelta(minutes=3)
                 if event.key == pygame.K_KP_5:
                     self.state.date_time -= datetime.timedelta(seconds=self.state.date_time.second) \
                                         +datetime.timedelta(microseconds=self.state.date_time.microsecond)
